@@ -1,12 +1,14 @@
 #pragma once
 
-#ifdef _WIN32
-#include "sys/windows/WindowsDynamicLibrary.h"
+#ifdef WIN32
+	#include "Sys/Windows/WindowsDynamicLibrary.h"
+#elseif LINUX
+	// todo ?
 #endif
 
-namespace pg::commons
+namespace sb::common
 {
-#ifdef _WIN32
-	using DynamicLibrary = pg::commons::WindowsDynamicLibrary;
+#ifdef WIN32
+	using DynamicLibrary = sb::common::WindowsDynamicLibrary;
 #endif
 }
