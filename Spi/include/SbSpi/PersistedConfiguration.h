@@ -141,14 +141,14 @@ namespace spi
 	template <>
 	struct Converter<std::string>
 	{
-		static std::string& toString(std::string& value)
+		static std::string& toString(std::string&& value)
 		{
 			return value;
 		}
 
 		static std::string fromString(const std::string& src)
 		{
-			return src;
+			return std::move(src);
 		}
 	};
 

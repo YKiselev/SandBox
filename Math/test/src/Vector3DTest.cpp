@@ -58,7 +58,8 @@ TEST(Vector3D, MultiplyByScalar)
 
 TEST(Vector3D, MultiplyByScalarAndAssign)
 {
-	const Vector3D& result = Vector3D(1, 2, 3) *= 100;
+	Vector3D a = Vector3D(1, 2, 3);
+	const Vector3D& result = a *= 100;
 	EXPECT_FLOAT_EQ(100, result.x);
 	EXPECT_FLOAT_EQ(200, result.y);
 	EXPECT_FLOAT_EQ(300, result.z);
@@ -98,7 +99,8 @@ TEST(Vector3D, SubtractVector)
 
 TEST(Vector3D, IncrementByVector)
 {
-	const Vector3D& result = Vector3D(1, 2, 3) += Vector3D(4, 5, 6);
+	Vector3D a = Vector3D(1, 2, 3);
+	const Vector3D& result = a += Vector3D(4, 5, 6);
 	EXPECT_FLOAT_EQ(5, result.x);
 	EXPECT_FLOAT_EQ(7, result.y);
 	EXPECT_FLOAT_EQ(9, result.z);
@@ -106,7 +108,8 @@ TEST(Vector3D, IncrementByVector)
 
 TEST(Vector3D, DecrementByVector)
 {
-	const Vector3D& result = Vector3D(1, 2, 3) -= Vector3D(4, 5, 6);
+	Vector3D a = Vector3D(1, 2, 3);
+	const Vector3D& result = a -= Vector3D(4, 5, 6);
 	EXPECT_FLOAT_EQ(-3, result.x);
 	EXPECT_FLOAT_EQ(-3, result.y);
 	EXPECT_FLOAT_EQ(-3, result.z);
@@ -130,7 +133,8 @@ TEST(Vector3D, DivideByVector)
 
 TEST(Vector3D, MultiplyByVectorAndAssign)
 {
-	const Vector3D& result = Vector3D(1, 2, 3) *= Vector3D(4, 5, 6);
+	Vector3D a = Vector3D(1, 2, 3);
+	const Vector3D& result = a *= Vector3D(4, 5, 6);
 	EXPECT_FLOAT_EQ(4, result.x);
 	EXPECT_FLOAT_EQ(10, result.y);
 	EXPECT_FLOAT_EQ(18, result.z);
@@ -138,7 +142,8 @@ TEST(Vector3D, MultiplyByVectorAndAssign)
 
 TEST(Vector3D, DivideByVectorAndAssign)
 {
-	const Vector3D& result = Vector3D(10, 20, 30) /= Vector3D(5, 4, 5);
+	Vector3D a = Vector3D(10, 20, 30);
+	const Vector3D& result = a /= Vector3D(5, 4, 5);
 	EXPECT_FLOAT_EQ(2, result.x);
 	EXPECT_FLOAT_EQ(5, result.y);
 	EXPECT_FLOAT_EQ(6, result.z);

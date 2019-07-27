@@ -15,6 +15,6 @@ target_include_directories(SbCore PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(SbCore SbCommon SbSpi glfw)
+target_link_libraries(SbCore SbCommon SbSpi glfw3)
 
 add_subdirectory(test)

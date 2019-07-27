@@ -58,25 +58,31 @@ namespace math
 		return !(a == b);
 	}
 
-	inline Vector3D operator * (const Vector3D& v, float scale)
+	template <typename T, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
+	inline Vector3D operator * (const Vector3D& v, T scale)
 	{
-		return { v.x * scale, v.y * scale, v.z * scale };
+		const float f = static_cast<float>(scale);
+		return { v.x * f, v.y * f, v.z * f };
 	}
 
-	inline Vector3D& operator *= (Vector3D& v, float scale)
+	template <typename T, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
+	inline Vector3D& operator *= (Vector3D& v, T scale)
 	{
-		v.x *= scale;
-		v.y *= scale;
-		v.z *= scale;
+		const float f = static_cast<float>(scale);
+		v.x *= f;
+		v.y *= f;
+		v.z *= f;
 		return v;
 	}
 
-	inline Vector3D operator * (float scale, const Vector3D& v)
+	template <typename T, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
+	inline Vector3D operator * (T scale, const Vector3D& v)
 	{
 		return v * scale;
 	}
 
-	inline Vector3D operator / (const Vector3D& v, float scale)
+	template <typename T, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
+	inline Vector3D operator / (const Vector3D& v, T scale)
 	{
 		return v * (1.0f / scale);
 	}

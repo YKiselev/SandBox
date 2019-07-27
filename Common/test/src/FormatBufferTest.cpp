@@ -12,7 +12,7 @@ TEST(Format, VaList)
 	std::cout << fb;
 }
 
-template <typename S, typename C = S::char_type>
+template <typename S, typename C = typename S::char_type>
 void format(S & out, const C * p)
 {
 	if (!p)
@@ -29,7 +29,7 @@ void format(S & out, const C * p)
 	}
 }
 
-template <typename S, typename C = S::char_type, typename Arg, typename... Args>
+template <typename S, typename C = typename S::char_type, typename Arg, typename... Args>
 void format(S& out, const C* fmt, Arg arg, Args...args)
 {
 	while (fmt && *fmt)
