@@ -1,15 +1,10 @@
 ﻿cmake_minimum_required (VERSION 3.13)
 
-add_library (SbMath)
+add_library (SbMath src/Matrix4D.cpp)
 
-target_sources(SbMath
-	PUBLIC
-		Constants.h
-		Matrix4D.h
-		Radians.h
-		Vector3D.h
-	PRIVATE
-		Matrix4D.cpp
+target_include_directories(SbMath PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+    $<INSTALL_INTERFACE:include>
 )
 
-target_include_directories(SbMath INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+add_subdirectory(test)

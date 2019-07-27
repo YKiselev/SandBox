@@ -8,20 +8,16 @@ set(INCLUDE_INSTALL_DIR include/ CACHE STRING "")
 set(LIB_INSTALL_DIR lib/ CACHE STRING "")
 set(SYSCONFIG_INSTALL_DIR etc/sb/ CACHE STRING "")
 
-add_library (SbCommon)
-
-target_sources(SbCommon
-	PRIVATE
-		FormatBuffer.cpp
-		Sys/Windows/WindowsErrorFormat.cpp
+add_library (SbCommon
+	src/FormatBuffer.cpp
 )
 
 target_include_directories(SbCommon PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>  
-    $<INSTALL_INTERFACE:include/sb-common>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Sys/Windows>  
-    $<INSTALL_INTERFACE:include/sb-common/Sys/Windows>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+    $<INSTALL_INTERFACE:include>
 )
+
+add_subdirectory(test)
 
 # Library publishing stuff
 

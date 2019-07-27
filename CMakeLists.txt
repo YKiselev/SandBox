@@ -35,6 +35,8 @@ else()
 endif()
 
 
+enable_testing()
+
 # Include sub-projects.
 add_subdirectory (App)
 add_subdirectory (Common)
@@ -68,11 +70,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 					${CMAKE_CURRENT_BINARY_DIR}/googletest-build
 					EXCLUDE_FROM_ALL)
 
-
-
-enable_testing()
-add_subdirectory (Test)
-
 if(WIN32)
-	add_subdirectory (WinTest)
+	add_subdirectory (Windows)
 endif()
