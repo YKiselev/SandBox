@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.13)
 
-add_library (SbSpi src/Spi.cpp)
+add_library (SbSpi src/Spi.cpp src/DelegatingWindowEvents.cpp)
 
 target_include_directories(SbSpi 
 	PUBLIC
@@ -8,4 +8,26 @@ target_include_directories(SbSpi
 		$<INSTALL_INTERFACE:include>
 )
 
+target_link_libraries(SbSpi SbCommon glfw3)
+
 add_subdirectory(test)
+
+# installation
+
+install(TARGETS SbSpi EXPORT SbSpiTargets
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
+	RUNTIME DESTINATION bin
+	INCLUDES DESTINATION include
+)
+
+install(TARGETS SbSpi EXPORT SandBoxConfig)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${PROJECT_BINARY_DIR}/SbSpiConfigVersion.cmake"
+    VERSION
+        ${PROJECT_VERSION}
+    COMPATIBILITY
+        AnyNewerVersion
+)
+install(FILES "${PROJECT_BINARY_DIR}/SbSpiConfigVersion.cmake" DESTINATION lib/cmake/SbSpi)

@@ -1,16 +1,11 @@
 #include <iostream>
 #include <thread>
 #include <GLFW/glfw3.h>
-#include <gl/GL.h>
+#include <GL/gl.h>
 #include "SbCommon/ScopeGuard.h"
 #include "../include/SbCore/App.h"
 #include "../include/SbCore/AppWindow.h"
 
-
-void errorCallback(int error, const char* description)
-{
-	std::cout << "ERROR " << error << ", \"" << description << "\"" << std::endl;
-}
 
 namespace app
 {
@@ -20,6 +15,11 @@ namespace app
 
 	App::~App()
 	{
+	}
+
+	void errorCallback(int error, const char* description)
+	{
+		std::cout << "ERROR " << error << ", \"" << description << "\"" << std::endl;
 	}
 
 	int App::run()
@@ -37,11 +37,13 @@ namespace app
 		window.makeContextCurrent();
 		::glfwSwapInterval(1);
 
+		// debug
 		const std::chrono::milliseconds timespan(5);
 		while (!window.shouldClose())
 		{
 			::glfwPollEvents();
 			window.swapBuffers();
+			// debug
 			std::this_thread::sleep_for(timespan);
 		}
 

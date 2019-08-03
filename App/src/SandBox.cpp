@@ -1,12 +1,11 @@
 ﻿// SandBox.cpp : Defines the entry point for the application.
 //
 
-#include "SandBox.h"
-
-using namespace std;
+#include "SbCore/App.h"
 
 int main()
 {
-	cout << "Hello CMake." << endl;
-	return 0;
+	app::App app;
+	
+	return app.run();
 }

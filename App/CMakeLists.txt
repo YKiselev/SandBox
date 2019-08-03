@@ -2,4 +2,4 @@
 
 add_executable (App src/SandBox.cpp)
 
-target_link_libraries(App SbSpi)
+target_link_libraries(App SbSpi SbCore)

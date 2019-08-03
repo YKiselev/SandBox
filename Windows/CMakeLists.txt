@@ -3,11 +3,6 @@
 #
 cmake_minimum_required (VERSION 3.13)
 
-set(SbCommon_VERSION 1.0.0)
-set(INCLUDE_INSTALL_DIR include/ CACHE STRING "")
-set(LIB_INSTALL_DIR lib/ CACHE STRING "")
-set(SYSCONFIG_INSTALL_DIR etc/sb/ CACHE STRING "")
-
 add_library (SbWindows
 	src/WindowsErrorFormat.cpp
 )
@@ -18,3 +13,23 @@ target_include_directories(SbWindows PUBLIC
 )
 
 add_subdirectory(test)
+
+# installation
+
+install(TARGETS SbWindows EXPORT SbWindowsTargets
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
+	RUNTIME DESTINATION bin
+	INCLUDES DESTINATION include
+)
+
+install(TARGETS SbWindows EXPORT SandBoxConfig)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${PROJECT_BINARY_DIR}/SbWindowsConfigVersion.cmake"
+    VERSION
+        ${PROJECT_VERSION}
+    COMPATIBILITY
+        AnyNewerVersion
+)
+install(FILES "${PROJECT_BINARY_DIR}/SbWindowsConfigVersion.cmake" DESTINATION lib/cmake/SbWindows)

@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef WIN32
-	#include "Sys/Windows/WindowsDynamicLibrary.h"
+	#include "SbWindowsWindowsDynamicLibrary.h"
 #elseif LINUX
 	// todo ?
 #endif

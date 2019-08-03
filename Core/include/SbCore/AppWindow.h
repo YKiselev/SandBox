@@ -1,7 +1,9 @@
 #pragma once
 
 #include <stdexcept>
+#include <memory>
 #include <GLFW/glfw3.h>
+#include "SbSpi/DelegatingWindowEvents.h"
 
 namespace app
 {
@@ -13,7 +15,7 @@ namespace app
 	public:
 		class Builder;
 
-		AppWindow(GLFWwindow *wnd);
+		AppWindow(GLFWwindow* wnd);
 		AppWindow(const AppWindow& src) = delete;
 		AppWindow(AppWindow&& src) noexcept;
 		~AppWindow();
@@ -21,12 +23,14 @@ namespace app
 		void makeContextCurrent() const;
 		bool shouldClose() const;
 		void swapBuffers() const;
+		void routeTo(std::shared_ptr<sb_spi::WindowEvents> events);
 
 		AppWindow& operator = (const AppWindow& src) = delete;
 		AppWindow& operator = (AppWindow&& src) noexcept;
 
 	private:
 		GLFWwindow* window;
+		std::shared_ptr<sb_spi::WindowEvents> events;
 	};
 
 	/*
@@ -48,11 +52,10 @@ namespace app
 		::glfwSwapBuffers(window);
 	}
 
-	inline AppWindow& AppWindow::operator = (AppWindow&& src) noexcept
+	inline void AppWindow::routeTo(std::shared_ptr<sb_spi::WindowEvents> target)
 	{
-		window = src.window;
-		src.window = nullptr;
-		return *this;
+		events = target;
+		::glfwSetWindowUserPointer(window, events.get());
 	}
 
 	/*

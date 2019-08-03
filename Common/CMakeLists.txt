@@ -8,6 +8,8 @@ set(INCLUDE_INSTALL_DIR include/ CACHE STRING "")
 set(LIB_INSTALL_DIR lib/ CACHE STRING "")
 set(SYSCONFIG_INSTALL_DIR etc/sb/ CACHE STRING "")
 
+set(SANDBOX 1)
+
 add_library (SbCommon
 	src/FormatBuffer.cpp
 )
@@ -17,10 +19,14 @@ target_include_directories(SbCommon PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
+if(WIN32)
+	target_link_libraries(SbCommon PRIVATE SbWindows)
+endif()
+
 add_subdirectory(test)
 
 # Library publishing stuff
-
+#[[
 install(TARGETS SbCommon EXPORT SbCommonTargets
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
@@ -51,3 +57,25 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SbCommonConfig.cmake"
 	"${CMAKE_CURRENT_BINARY_DIR}/SbCommonConfigVersion.cmake"
 	DESTINATION lib/cmake/SbCommon
 )
+]]
+
+# installation
+
+install(TARGETS SbCommon EXPORT SbCommonTargets
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
+	RUNTIME DESTINATION bin
+	INCLUDES DESTINATION include
+)
+
+install(TARGETS SbCommon EXPORT SandBoxConfig)
+#install(EXPORT SbCoreConfig NAMESPACE SandBox:: DESTINATION lib/cmake/SbCore)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${PROJECT_BINARY_DIR}/SbCommonConfigVersion.cmake"
+    VERSION
+        ${PROJECT_VERSION}
+    COMPATIBILITY
+        AnyNewerVersion
+)
+install(FILES "${PROJECT_BINARY_DIR}/SbCommonConfigVersion.cmake" DESTINATION lib/cmake/SbCommon)

@@ -3,7 +3,7 @@
 
 #include "../include/SbWindows/WindowsErrorFormat.h"
 
-namespace sb::common::sys::windows
+namespace sb::sys::windows
 {
 	std::wstring fromError(DWORD code)
 	{

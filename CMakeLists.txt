@@ -3,7 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.13)
 
-project ("SandBox")
+project (SandBox VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -70,3 +70,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 if(WIN32)
 	add_subdirectory (Windows)
 endif()
+
+# Next line results in error: install(EXPORT "SandBoxConfig" ...) includes target "SbCore" which requires target "glfw3" that is not in the export set.
+#install(EXPORT SandBoxConfig NAMESPACE SandBox:: DESTINATION lib)

@@ -14,16 +14,16 @@ namespace app
 	void AppConfiguration::loadAll(const std::string& name)
 	{
 	}
-	void AppConfiguration::add(const std::string& name, spi::IntValue& value)
+	void AppConfiguration::add(const std::string& name, sb_spi::IntValue& value)
 	{
 	}
-	void AppConfiguration::addReadOnly(const std::string& name, const spi::IntValue& value)
+	void AppConfiguration::addReadOnly(const std::string& name, const sb_spi::IntValue& value)
 	{
 	}
-	void AppConfiguration::add(const std::string& name, spi::FloatValue& value)
+	void AppConfiguration::add(const std::string& name, sb_spi::FloatValue& value)
 	{
 	}
-	void AppConfiguration::addReadOnly(const std::string& name, const spi::FloatValue& value)
+	void AppConfiguration::addReadOnly(const std::string& name, const sb_spi::FloatValue& value)
 	{
 	}
 	std::string AppConfiguration::getString(const std::string& name) const
@@ -55,22 +55,22 @@ namespace app
 	{
 	}
 	
-	spi::IntValue const* AppConfiguration::findInt(const std::string& name) const
+	sb_spi::IntValue const* AppConfiguration::findInt(const std::string& name) const
 	{
 		return nullptr;
 	}
 	
-	spi::FloatValue const* AppConfiguration::findFloat(const std::string& name) const
+	sb_spi::FloatValue const* AppConfiguration::findFloat(const std::string& name) const
 	{
 		return nullptr;
 	}
 	
-	spi::BoolValue const* AppConfiguration::findBool(const std::string& name) const
+	sb_spi::BoolValue const* AppConfiguration::findBool(const std::string& name) const
 	{
 		return nullptr;
 	}
 	
-	spi::StringValue const* AppConfiguration::findString(const std::string& name) const
+	sb_spi::StringValue const* AppConfiguration::findString(const std::string& name) const
 	{
 		return nullptr;
 	}

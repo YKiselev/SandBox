@@ -10,7 +10,7 @@
 #include <type_traits>
 #include <shared_mutex>
 
-namespace spi
+namespace sb_spi
 {
 	namespace traits
 	{
