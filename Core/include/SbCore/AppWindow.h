@@ -64,32 +64,10 @@ namespace app
 	class AppWindow::Builder
 	{
 	public:
-		Builder& withTitle(const char* value)
-		{
-			title = value;
-			return *this;
-		}
-
-		Builder& withSize(int w, int h)
-		{
-			width = w;
-			height = h;
-			return *this;
-		}
-
-		Builder& withContextVersion(int major, int minor)
-		{
-			majorVersion = major;
-			minorVersion = minor;
-			return *this;
-		}
-
-		Builder& withFullScreen(bool value)
-		{
-			fullScreen = value;
-			return *this;
-		}
-
+		Builder& withTitle(const char* value);
+		Builder& withSize(int w, int h);
+		Builder& withContextVersion(int major, int minor);
+		Builder& withFullScreen(bool value);
 		AppWindow build();
 
 	private:

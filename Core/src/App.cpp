@@ -30,7 +30,7 @@ namespace app
 		{
 			return 1;
 		}
-		const sb::common::OnScopeExit terminator{ ::glfwTerminate };
+		const sb_com::OnScopeExit terminator{ ::glfwTerminate };
 
 		const app::AppWindow window = app::AppWindow::Builder{}.build();
 

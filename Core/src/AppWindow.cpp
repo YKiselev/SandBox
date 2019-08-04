@@ -111,7 +111,39 @@ namespace app
 		window = nullptr;
 	}
 
-	AppWindow AppWindow::Builder::build()
+	/*
+		Builder
+	*/
+
+	using Builder = AppWindow::Builder;
+
+	Builder& Builder::withTitle(const char* value)
+	{
+		title = value;
+		return *this;
+	}
+
+	Builder& Builder::withSize(int w, int h)
+	{
+		width = w;
+		height = h;
+		return *this;
+	}
+
+	Builder& Builder::withContextVersion(int major, int minor)
+	{
+		majorVersion = major;
+		minorVersion = minor;
+		return *this;
+	}
+
+	Builder& Builder::withFullScreen(bool value)
+	{
+		fullScreen = value;
+		return *this;
+	}
+
+	AppWindow Builder::build()
 	{
 		::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion);
 		::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);

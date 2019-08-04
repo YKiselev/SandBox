@@ -5,8 +5,8 @@
 #include "SbMath/Vector3D.h"
 #include "SbMath/Radians.h"
 
-using math::Matrix4D;
-using math::Vector3D;
+using sb_math::Matrix4D;
+using sb_math::Vector3D;
 
 TEST(Matrix4D, Identity)
 {
@@ -492,9 +492,9 @@ TEST_P(RotateTest, Rotation)
 	const Vector3D v1 = std::get<3>(tuple);
 	const Vector3D v2 = std::get<4>(tuple);
 	const Matrix4D m = Matrix4D::rotation(
-		math::toRadians(ax),
-		math::toRadians(ay),
-		math::toRadians(az)
+		sb_math::toRadians(ax),
+		sb_math::toRadians(ay),
+		sb_math::toRadians(az)
 	);
 	const Vector3D r = m * v1;
 

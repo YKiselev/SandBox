@@ -1,6 +1,6 @@
 #pragma once
 
-namespace sb::common
+namespace sb_com
 {
 	class OnScopeExit
 	{

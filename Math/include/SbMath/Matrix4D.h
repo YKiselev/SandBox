@@ -2,7 +2,7 @@
 
 #include "Vector3D.h"
 
-namespace math
+namespace sb_math
 {
 	/*
 		Column-oriented matrix

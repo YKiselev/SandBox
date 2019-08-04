@@ -1,7 +1,7 @@
 #pragma once
 #include "Constants.h"
 
-namespace math
+namespace sb_math
 {
 	constexpr float RADIANS_TO_DEGREES{ 360.0f / (2.0f * PI) };
 

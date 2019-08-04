@@ -5,7 +5,7 @@
 #include <string>
 #include <Windows.h>
 
-namespace sb::sys::windows
+namespace sb_win
 {
 	std::wstring fromError(DWORD code);
 }

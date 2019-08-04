@@ -2,7 +2,7 @@
 #include "../include/SbMath/Matrix4D.h"
 
 
-namespace math
+namespace sb_math
 {
 
 	Matrix4D::Matrix4D(const float src[16]) : c1r1{ src[0] }, c1r2{ src[1] }, c1r3{ src[2] }, c1r4{ src[3] },

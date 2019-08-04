@@ -3,7 +3,7 @@
 #include <cstdio>
 #include "SbCommon/FormatBuffer.h"
 
-void sb::common::FormatBuffer::format(const char* fmt, ...)
+void sb_com::FormatBuffer::format(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);

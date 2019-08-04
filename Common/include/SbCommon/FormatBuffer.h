@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-namespace sb::common
+namespace sb_com
 {
 	class FormatBuffer final
 	{

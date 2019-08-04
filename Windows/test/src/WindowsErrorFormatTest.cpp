@@ -6,7 +6,7 @@
 
 TEST(ErrorFormat, Simplet)
 {
-	std::wstring msg{ sb::sys::windows::fromError(123) };
+	std::wstring msg{ sb_win::fromError(123) };
 
 	ASSERT_TRUE(msg.length() > 3);
 }

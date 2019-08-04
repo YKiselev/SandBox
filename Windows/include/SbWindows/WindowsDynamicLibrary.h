@@ -3,7 +3,7 @@
 #include <memory>
 #include <Windows.h>
 
-namespace sb::sys::windows
+namespace sb_win
 {
 	class WindowsDynamicLibrary final
 	{

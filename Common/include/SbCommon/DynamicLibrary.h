@@ -6,7 +6,7 @@
 	// todo ?
 #endif
 
-namespace sb::common
+namespace sb_com
 {
 #ifdef WIN32
 	using DynamicLibrary = sb::common::sys::win::WindowsDynamicLibrary;

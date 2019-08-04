@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.13)
 
-add_library (SbSpi src/Spi.cpp src/DelegatingWindowEvents.cpp)
+add_library (SbSpi src/DelegatingWindowEvents.cpp)
 
 target_include_directories(SbSpi 
 	PUBLIC
