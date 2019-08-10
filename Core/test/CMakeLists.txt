@@ -1,8 +1,4 @@
-﻿# CMakeList.txt : CMake project for SandBox, include source and define
-# project specific logic here.
-#
-cmake_minimum_required (VERSION 3.13)
-
+﻿cmake_minimum_required (VERSION 3.10)
 
 include(GoogleTest)
 
@@ -12,8 +8,8 @@ add_executable(SbCoreTests
 
 target_link_libraries(SbCoreTests 
 	SbCore 
-	gtest 
-	gtest_main
+	GTest::GTest 
+	GTest::Main
 )
 
 gtest_discover_tests(SbCoreTests)

@@ -82,7 +82,7 @@ namespace
 		::glfwSetScrollCallback(window, onScroll);
 		::glfwSetWindowFocusCallback(window, onFocus);
 		::glfwSetWindowIconifyCallback(window, onIconify);
-		::glfwSetWindowMaximizeCallback(window, onMaximize);
+		//::glfwSetWindowMaximizeCallback(window, onMaximize);
 		::glfwSetWindowSizeCallback(window, onWindowSize);
 	}
 }

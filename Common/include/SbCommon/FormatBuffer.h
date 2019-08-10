@@ -1,7 +1,9 @@
 #pragma once
 
 #include <string>
-#include <iostream>
+#include <vector>
+#include <cstdio>
+//#include <iostream>
 
 namespace sb_com
 {
@@ -11,24 +13,26 @@ namespace sb_com
 		FormatBuffer()
 		{
 		}
-		FormatBuffer(const std::string& src) : buf{ src }
+		FormatBuffer(std::size_t size) : buf(size)
 		{
 		}
 
 		void format(const char* fmt, ...);
 
-		inline const std::string& buffer() const
+		inline const std::vector<char>& buffer() const
 		{
 			return buf;
 		}
 
 	private:
-		std::string buf;
+		std::vector<char> buf;
 	};
 
-	inline std::ostream& operator << (std::ostream& out, const FormatBuffer& buf)
+	/*
+	inline std::ostream& operator << (std::ostream& out, const FormatBuffer<char>& buf)
 	{
 		out << buf.buffer();
 		return out;
 	}
+	*/
 }

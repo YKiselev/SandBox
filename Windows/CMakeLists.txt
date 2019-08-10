@@ -1,10 +1,11 @@
 ﻿# CMakeList.txt : CMake project for SandBox, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.13)
+cmake_minimum_required (VERSION 3.10)
 
 add_library (SbWindows
 	src/WindowsErrorFormat.cpp
+	src/WindowsDynamicLibrary.cpp
 )
 
 target_include_directories(SbWindows PUBLIC
@@ -15,7 +16,7 @@ target_include_directories(SbWindows PUBLIC
 add_subdirectory(test)
 
 # installation
-
+#[[
 install(TARGETS SbWindows EXPORT SbWindowsTargets
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
@@ -33,3 +34,4 @@ write_basic_package_version_file("${PROJECT_BINARY_DIR}/SbWindowsConfigVersion.c
         AnyNewerVersion
 )
 install(FILES "${PROJECT_BINARY_DIR}/SbWindowsConfigVersion.cmake" DESTINATION lib/cmake/SbWindows)
+]]

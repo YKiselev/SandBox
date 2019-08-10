@@ -3,6 +3,9 @@
 #include <cstdio>
 #include "SbCommon/FormatBuffer.h"
 
+/*
+	See int vswprintf(wchar_t *restrict ws, size_t n, const wchar_t *restrict format, va_list arg);
+*/
 void sb_com::FormatBuffer::format(const char* fmt, ...)
 {
 	va_list args;
@@ -15,7 +18,7 @@ void sb_com::FormatBuffer::format(const char* fmt, ...)
 	va_end(args2);
 	if (required < 0)
 	{
-		buf = "<formatting failed>";
+		buf.clear();// = "<formatting failed>";
 	}
 	else
 	{

@@ -16,14 +16,12 @@ target_include_directories(SbCore PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(SbCore SbCommon SbSpi glfw3)
+target_link_libraries(SbCore SbCommon SbSpi glfw)
 
-if(SANDBOX)
-	add_subdirectory(test)
-endif()
+add_subdirectory(test)
 
 # installation
-
+#[[
 install(TARGETS SbCore EXPORT SbCoreTargets
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
@@ -42,3 +40,4 @@ write_basic_package_version_file("${PROJECT_BINARY_DIR}/SbCoreConfigVersion.cmak
         AnyNewerVersion
 )
 install(FILES "${PROJECT_BINARY_DIR}/SbCoreConfigVersion.cmake" DESTINATION lib/cmake/SbCore)
+]]

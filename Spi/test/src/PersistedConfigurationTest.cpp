@@ -68,8 +68,9 @@ TEST(FloatValue, FromString)
 
 TEST(FloatValue, ToString)
 {
-	sb_spi::FloatValue v{ 34.55f };
-	ASSERT_EQ("34.55", v.toString());
+	sb_spi::FloatValue v{ 34.54999924f };
+
+	ASSERT_EQ("34.549999", v.toString());
 }
 
 TEST(BoolValue, AtomicValue)

@@ -1,6 +1,5 @@
 
-#ifdef WIN32
-
+#include <Windows.h>
 #include "../include/SbWindows/WindowsErrorFormat.h"
 
 namespace sb_win
@@ -8,7 +7,7 @@ namespace sb_win
 	std::wstring fromError(DWORD code)
 	{
 		LPVOID lpMsgBuf;
-		DWORD result = ::FormatMessage(
+		DWORD result = ::FormatMessageW(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER |
 			FORMAT_MESSAGE_FROM_SYSTEM |
 			FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -26,5 +25,3 @@ namespace sb_win
 		return r;
 	}
 }
-
-#endif //  WIN32

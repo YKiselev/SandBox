@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.13)
+﻿cmake_minimum_required (VERSION 3.10)
 
 add_library (SbMath src/Matrix4D.cpp)
 
@@ -10,7 +10,7 @@ target_include_directories(SbMath PUBLIC
 add_subdirectory(test)
 
 # installation
-
+#[[
 install(TARGETS SbMath EXPORT SbMathTargets
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
@@ -28,3 +28,4 @@ write_basic_package_version_file("${PROJECT_BINARY_DIR}/SbMathConfigVersion.cmak
         AnyNewerVersion
 )
 install(FILES "${PROJECT_BINARY_DIR}/SbMathConfigVersion.cmake" DESTINATION lib/cmake/SbMath)
+]]

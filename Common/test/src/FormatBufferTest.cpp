@@ -7,7 +7,7 @@ TEST(Format, VaList)
 {
 	sb_com::FormatBuffer fb;
 
-	fb.format("%d %d %d %s\n", 1, 2, 3, "C string's are alive!");
+	fb.format("%i %x %.1f %.3f %s", 1, 31, 2.51f, 3.333, "abc");
 
-	std::cout << fb;
+	//ASSERT_EQ("1 1f 2.5 3.333 abc", fb.buffer());
 }

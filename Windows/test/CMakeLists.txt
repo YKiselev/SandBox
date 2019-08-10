@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.13)
+﻿cmake_minimum_required (VERSION 3.10)
 
 include(GoogleTest)
 
@@ -6,11 +6,11 @@ add_executable(SbWindowsTests
 	src/WindowsErrorFormatTest.cpp
 )
 
-target_link_libraries(SbWindowsTests 
+target_link_libraries(SbWindowsTests PRIVATE
 	SbCommon 
 	SbWindows
-	gtest 
-	gtest_main
+	GTest::GTest 
+	GTest::Main
 )
 
 gtest_discover_tests(SbWindowsTests)

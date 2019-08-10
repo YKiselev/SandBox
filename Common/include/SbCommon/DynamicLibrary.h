@@ -1,14 +1,14 @@
 #pragma once
 
 #ifdef WIN32
-	#include "SbWindowsWindowsDynamicLibrary.h"
-#elseif LINUX
+	#include "SbWindows/WindowsDynamicLibrary.h"
+#elif LINUX
 	// todo ?
 #endif
 
 namespace sb_com
 {
 #ifdef WIN32
-	using DynamicLibrary = sb::common::sys::win::WindowsDynamicLibrary;
+	using DynamicLibrary = sb_win::WindowsDynamicLibrary;
 #endif
 }

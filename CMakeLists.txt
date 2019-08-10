@@ -1,7 +1,4 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
-#
-cmake_minimum_required (VERSION 3.13)
+﻿cmake_minimum_required (VERSION 3.10)
 
 project (SandBox VERSION 1.0 LANGUAGES CXX)
 
@@ -11,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_DEBUG_POSTFIX "-d")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 if(MSVC)
 	add_compile_options(/W4)
@@ -23,16 +21,17 @@ add_definitions(-DUNICODE -D_UNICODE)
 
 # Pass target platform defines to source code
 if(WIN32)
-	add_definitions(-DWIN32=1)
+	add_definitions(-DWIN32 -DWIN32_LEAN_AND_MEAN)
 endif()
 
-find_package(glfw3 REQUIRED)
-add_library(glfw3 INTERFACE)
-target_include_directories(glfw3 INTERFACE ${glfw3_INCLUDE})
-target_link_libraries(glfw3 INTERFACE ${glfw3_LIBRARY})
-
+find_package(glfw3 CONFIG REQUIRED)
+#add_library(glfw3 INTERFACE)
+#target_include_directories(glfw3 INTERFACE ${glfw3_INCLUDE})
+#target_link_libraries(glfw3 INTERFACE ${glfw3_LIBRARY})
 
 enable_testing()
+find_package(GTest MODULE REQUIRED)
+#target_link_libraries(main PRIVATE GTest::GTest GTest::Main)
 
 # Include sub-projects.
 add_subdirectory (App)
@@ -40,9 +39,10 @@ add_subdirectory (Common)
 add_subdirectory (Math)
 add_subdirectory (Core)
 add_subdirectory (Spi)
-
+add_subdirectory (Game)
 
 # Download and unpack googletest at configure time
+#[[
 configure_file(CMakeLists.txt.gtest googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
 	RESULT_VARIABLE result
@@ -66,6 +66,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 					${CMAKE_CURRENT_BINARY_DIR}/googletest-build
 					EXCLUDE_FROM_ALL)
+]]
 
 if(WIN32)
 	add_subdirectory (Windows)

@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.13)
+﻿cmake_minimum_required (VERSION 3.10)
 
 include(GoogleTest)
 
@@ -8,8 +8,8 @@ add_executable(SbCommonTests
 
 target_link_libraries(SbCommonTests 
 	SbCommon 
-	gtest 
-	gtest_main
+	GTest::GTest 
+	GTest::Main
 )
 
 gtest_discover_tests(SbCommonTests)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstdio>
 #include <array>
 #include <charconv>
 #include <exception>
@@ -90,16 +91,7 @@ namespace sb_spi
 	{
 		static std::string toString(V value)
 		{
-			std::array<char, 48> buf;
-			auto [p, ec] = std::to_chars(buf.data(), buf.data() + buf.size(), value);
-			if (ec == std::errc())
-			{
-				return std::string(buf.data(), p - buf.data());
-			}
-			else
-			{
-				return "value_too_long";
-			}
+			return std::to_string(value);
 		}
 
 		static V fromString(const std::string& src)
@@ -110,18 +102,38 @@ namespace sb_spi
 			}
 			else
 			{
-				V result;
-				auto ec = std::from_chars(src.data(), src.data() + src.size(), result).ec;
-				if (ec == std::errc())
-				{
-					return result;
-				}
-				else
-				{
-					return {};
-				}
+				return fromNonEmptyString<V>(src);
+				/*				V result;
+								auto ec = std::from_chars(src.data(), src.data() + src.size(), result).ec;
+								if (ec == std::errc())
+								{
+									return result;
+								}
+								else
+								{
+									return {};
+								}*/
 			}
 		}
+
+	private:
+		template <typename V2 = V, std::enable_if_t<std::is_integral_v<V2>, int> = 0>
+		static V2 fromNonEmptyString(const std::string & src)
+		{
+			return static_cast<V2>(std::stoll(src));
+		}
+
+		template <typename V2 = V, std::enable_if_t<std::is_floating_point_v<V2>, int> = 0>
+		static V2 fromNonEmptyString(const std::string & src)
+		{
+			return static_cast<V2>(std::stold(src));
+		}
+
+		//template <typename V2 = V, std::enable_if_t<!std::is_floating_point_v<V2> && !std::is_integral_v<V2>, int> = 0>
+		//static V2 fromNonEmptyString(const std::string & src)
+		//{
+		//	return {};
+		//}
 	};
 
 	template <>

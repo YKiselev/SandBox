@@ -1,14 +1,4 @@
-﻿# CMakeList.txt : CMake project for SandBox, include source and define
-# project specific logic here.
-#
-cmake_minimum_required (VERSION 3.13)
-
-set(SbCommon_VERSION 1.0.0)
-set(INCLUDE_INSTALL_DIR include/ CACHE STRING "")
-set(LIB_INSTALL_DIR lib/ CACHE STRING "")
-set(SYSCONFIG_INSTALL_DIR etc/sb/ CACHE STRING "")
-
-set(SANDBOX 1)
+﻿cmake_minimum_required (VERSION 3.10)
 
 add_library (SbCommon
 	src/FormatBuffer.cpp
@@ -20,7 +10,7 @@ target_include_directories(SbCommon PUBLIC
 )
 
 if(WIN32)
-	target_link_libraries(SbCommon PRIVATE SbWindows)
+	target_link_libraries(SbCommon SbWindows)
 endif()
 
 add_subdirectory(test)
@@ -60,7 +50,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SbCommonConfig.cmake"
 ]]
 
 # installation
-
+#[[
 install(TARGETS SbCommon EXPORT SbCommonTargets
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
@@ -79,3 +69,4 @@ write_basic_package_version_file("${PROJECT_BINARY_DIR}/SbCommonConfigVersion.cm
         AnyNewerVersion
 )
 install(FILES "${PROJECT_BINARY_DIR}/SbCommonConfigVersion.cmake" DESTINATION lib/cmake/SbCommon)
+]]
