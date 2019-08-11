@@ -1,6 +1,6 @@
 ﻿
 #include "SbCore/App.h"
-#include "SbCommon/DynamicLibrary.h"
+#include "SbPal/DynamicLibrary.h"
 #include "SbSpi/Game.h"
 #include <string>
 #include <iostream>
@@ -10,7 +10,7 @@ int main()
 {
 	std::wstring name = L"SbGame-d.dll";
 
-	sb_com::DynamicLibrary lib{ name };
+	sb_pal::DynamicLibrary lib{ name };
 
 	sb_spi::CreateGameSignature* fn1 = lib.address<sb_spi::CreateGameSignature>("createGame");
 

@@ -9,10 +9,6 @@ target_include_directories(SbCommon PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-if(WIN32)
-	target_link_libraries(SbCommon SbWindows)
-endif()
-
 add_subdirectory(test)
 
 # Library publishing stuff

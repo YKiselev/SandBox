@@ -31,7 +31,6 @@ find_package(glfw3 CONFIG REQUIRED)
 
 enable_testing()
 find_package(GTest MODULE REQUIRED)
-#target_link_libraries(main PRIVATE GTest::GTest GTest::Main)
 
 # Include sub-projects.
 add_subdirectory (App)
@@ -39,6 +38,7 @@ add_subdirectory (Common)
 add_subdirectory (Math)
 add_subdirectory (Core)
 add_subdirectory (Spi)
+add_subdirectory (Pal)
 add_subdirectory (Game)
 
 # Download and unpack googletest at configure time

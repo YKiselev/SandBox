@@ -5,5 +5,5 @@
 
 namespace sb_win
 {
-	std::wstring fromError(DWORD code);
+	std::string fromError(DWORD code);
 }

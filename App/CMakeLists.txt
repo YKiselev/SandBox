@@ -10,7 +10,7 @@ endif()
 
 add_executable (App "${EXEC_TYPE}" src/SandBox.cpp)
 
-target_link_libraries(App SbCommon SbCore SbSpi)
+target_link_libraries(App SbCommon SbCore SbSpi SbPal)
 
 set_target_properties(App PROPERTIES 
 	VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR>"

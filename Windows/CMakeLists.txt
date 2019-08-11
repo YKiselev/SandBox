@@ -13,6 +13,8 @@ target_include_directories(SbWindows PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
+target_link_libraries(SbWindows SbCommon)
+
 add_subdirectory(test)
 
 # installation

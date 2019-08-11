@@ -4,6 +4,7 @@ include(GoogleTest)
 
 add_executable(SbCommonTests 
 	src/FormatBufferTest.cpp
+	src/StringConversionTest.cpp
 )
 
 target_link_libraries(SbCommonTests 
