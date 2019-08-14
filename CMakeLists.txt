@@ -32,6 +32,7 @@ find_package(glfw3 CONFIG REQUIRED)
 enable_testing()
 find_package(GTest MODULE REQUIRED)
 
+
 # Include sub-projects.
 add_subdirectory (App)
 add_subdirectory (Common)

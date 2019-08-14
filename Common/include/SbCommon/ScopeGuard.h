@@ -2,11 +2,12 @@
 
 namespace sb_com
 {
-	template <typename R>
 	class OnScopeExit
 	{
 	public:
-		OnScopeExit(R& runnable) : runnable{ runnable }
+		using Runnable = void(*)();
+
+		OnScopeExit(Runnable runnable) : runnable{ runnable }
 		{
 		}
 
@@ -16,6 +17,7 @@ namespace sb_com
 		}
 
 	private:
-		const R& runnable;
+		Runnable runnable;
 	};
+
 }

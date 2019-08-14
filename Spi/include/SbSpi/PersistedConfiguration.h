@@ -128,12 +128,6 @@ namespace sb_spi
 		{
 			return static_cast<V2>(std::stold(src));
 		}
-
-		//template <typename V2 = V, std::enable_if_t<!std::is_floating_point_v<V2> && !std::is_integral_v<V2>, int> = 0>
-		//static V2 fromNonEmptyString(const std::string & src)
-		//{
-		//	return {};
-		//}
 	};
 
 	template <>
@@ -219,7 +213,7 @@ namespace sb_spi
 	class Configuration
 	{
 	public:
-		virtual ~Configuration() = 0;
+		virtual ~Configuration() {};
 
 		virtual void add(const std::string& name, IntValue& value) = 0;
 		virtual void addReadOnly(const std::string& name, const IntValue& value) = 0;
@@ -249,7 +243,7 @@ namespace sb_spi
 	class PersistedConfiguration : public Configuration
 	{
 	public:
-		virtual ~PersistedConfiguration() = 0;
+		virtual ~PersistedConfiguration() {};
 
 		virtual void persist(const std::string& name) const = 0;
 		virtual void load(const std::string& name) = 0;

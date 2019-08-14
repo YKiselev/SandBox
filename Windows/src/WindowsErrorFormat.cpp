@@ -2,6 +2,8 @@
 #include "../include/SbWindows/WindowsErrorFormat.h"
 #include <Windows.h>
 #include <vector>
+#include <memory>
+#include <functional>
 #include "SbCommon/ScopeGuard.h"
 
 namespace sb_win
@@ -21,7 +23,7 @@ namespace sb_win
 			0,
 			NULL
 		);
-		sb_com::OnScopeExit guard1{ [=] { ::LocalFree(lpMsgBuf); } };
+		std::unique_ptr<WCHAR, std::function<HLOCAL(HLOCAL)>> guard{ lpMsgBuf, ::LocalFree };
 		if (result)
 		{
 			const int required = ::WideCharToMultiByte(CP_UTF8, 0, lpMsgBuf, -1, NULL, 0, NULL, NULL);
@@ -35,10 +37,6 @@ namespace sb_win
 				}
 			}
 		}
-
-		//std::wstring r{ static_cast<LPTSTR>(lpMsgBuf) };
-		//::LocalFree(lpMsgBuf);
-
 		return "<Unable to retrieve system message>";
 	}
 }

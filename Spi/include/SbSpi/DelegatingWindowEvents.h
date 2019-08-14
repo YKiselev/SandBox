@@ -7,7 +7,7 @@
 
 namespace sb_spi
 {
-	class DelegatingWindowEvents : public WindowEvents
+	class DelegatingWindowEvents : public virtual WindowEvents
 	{
 	public:
 		DelegatingWindowEvents();
