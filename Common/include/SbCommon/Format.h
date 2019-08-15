@@ -5,34 +5,6 @@
 
 namespace sb_com
 {
-	struct Arg
-	{
-		enum Kind
-		{
-			Integer, Double, Char, Cstr
-		};
-		const Kind kind;
-		union
-		{
-			int vi;
-			double vd;
-			char vc;
-			const char* cstr;
-		};
-		Arg(int v) : vi{ v }, kind{ Integer }
-		{
-		}
-		Arg(double v) : vd{ v }, kind{ Double }
-		{
-		}
-		Arg(char v) : vc{ v }, kind{ Char }
-		{
-		}
-		Arg(const char* v) : cstr{ v }, kind{ Cstr }
-		{
-		}
-	};
-
 	class format_error : public std::runtime_error
 	{
 	public:
@@ -47,6 +19,201 @@ namespace sb_com
 	};
 
 	template <typename C>
+	struct Arg
+	{
+		enum Kind
+		{
+			None, Integer, UnsignedInteger, Long, UnsignedLong, LongLong, UnsignedLongLong, Double, LongDouble, Float, Char, Cstr, Pointer
+		};
+		const Kind kind;
+
+		Arg(int v) : i{ v }, kind{ Integer }
+		{
+		}
+		Arg(unsigned int v) : ui{ v }, kind{ UnsignedInteger }
+		{
+		}
+		Arg(long v) : l{ v }, kind{ Long }
+		{
+		}
+		Arg(unsigned long v) : ul{ v }, kind{ UnsignedLong }
+		{
+		}
+		Arg(long long v) : ll{ v }, kind{ LongLong }
+		{
+		}
+		Arg(unsigned long long v) : ull{ v }, kind{ UnsignedLongLong }
+		{
+		}
+		Arg(double v) : vd{ v }, kind{ Double }
+		{
+		}
+		Arg(long double v) : vld{ v }, kind{ LongDouble }
+		{
+		}
+		Arg(float v) : vf{ v }, kind{ Float }
+		{
+		}
+		Arg(C v) : vc{ v }, kind{ Char }
+		{
+		}
+		Arg(const C* v) : cstr{ v }, kind{ Cstr }
+		{
+		}
+		Arg(void* v) : ptr{ v }, kind{ Pointer }
+		{
+		}
+
+		inline int getInteger() const
+		{
+			switch (kind)
+			{
+			case Integer:
+				return i;
+
+			case UnsignedInteger:
+				return ui;
+
+			case Long:
+				return l;
+
+			case UnsignedLong:
+				return ul;
+
+			case LongLong:
+				return ll;
+
+			case UnsignedLongLong:
+				return ull;
+
+			default:
+				throw format_error("Not an integer: " + std::to_string(kind));
+			}
+		}
+
+		template <typename S>
+		void put(S& out) const
+		{
+			switch (kind)
+			{
+			case Integer:
+				out << i;
+				break;
+
+			case UnsignedInteger:
+				out << ui;
+				break;
+
+			case Long:
+				out << l;
+				break;
+
+			case UnsignedLong:
+				out << ul;
+				break;
+
+			case LongLong:
+				out << ll;
+				break;
+
+			case UnsignedLongLong:
+				out << ull;
+				break;
+
+			case Double:
+				out << vd;
+				break;
+
+			case LongDouble:
+				out << vld;
+				break;
+
+			case Float:
+				out << vf;
+				break;
+
+			case Char:
+				out << vc;
+				break;
+
+			case Cstr:
+				out << cstr;
+				break;
+
+			case Pointer:
+				out << ptr;
+				break;
+			}
+		}
+
+		template <typename S>
+		void putUnsigned(S& out) const
+		{
+			switch (kind)
+			{
+			case Integer:
+				out << static_cast<unsigned>(i);
+				break;
+
+			case UnsignedInteger:
+				out << ui;
+				break;
+
+			case Long:
+				out << static_cast<unsigned long>(l);
+				break;
+
+			case UnsignedLong:
+				out << ul;
+				break;
+
+			case LongLong:
+				out << static_cast<unsigned long long>(ll);
+				break;
+
+			case UnsignedLongLong:
+				out << ull;
+				break;
+
+			case Double:
+				out << static_cast<uintmax_t>(vd);
+				break;
+
+			case LongDouble:
+				out << static_cast<uintmax_t>(vld);
+				break;
+
+			case Float:
+				out << static_cast<uintmax_t>(vf);
+				break;
+
+			case Char:
+				out << static_cast<unsigned>(vc);
+				break;
+
+			default:
+				throw format_error("Not a number!");
+			}
+		}
+	private:
+		union
+		{
+			int i;
+			unsigned ui;
+			long l;
+			unsigned long ul;
+			long long ll;
+			unsigned long long ull;
+			float vf;
+			double vd;
+			long double vld;
+			C vc;
+			const C* cstr;
+			void* ptr;
+		};
+	};
+
+	template <typename C>
 	struct Literals
 	{
 		const static C percent = static_cast<C>('%');
@@ -57,6 +224,8 @@ namespace sb_com
 		const static C zero = static_cast<C>('0');
 		const static C nine = static_cast<C>('9');
 		const static C dot = static_cast<C>('.');
+		const static C a = static_cast<C>('a');
+		const static C A = static_cast<C>('A');
 		const static C d = static_cast<C>('d');
 		const static C e = static_cast<C>('e');
 		const static C E = static_cast<C>('E');
@@ -69,18 +238,34 @@ namespace sb_com
 		const static C z = static_cast<C>('z');
 		const static C t = static_cast<C>('t');
 		const static C L = static_cast<C>('L');
+		const static C u = static_cast<C>('u');
+		const static C o = static_cast<C>('o');
+		const static C x = static_cast<C>('x');
+		const static C X = static_cast<C>('X');
 		const static C star = static_cast<C>('*');
 	};
 
 	template <typename S, typename C = S::char_type>
-	void format2(S & out, const C * fmt)
+	void format(S & out, const C * fmt)
 	{
-		// todo
-		int g2 = 0;
+		out << fmt;
 	}
 
 	template <typename S, typename C = S::char_type, typename L = Literals<C>, typename... Args>
-	void format2(S& out, const C* fmt, Args...args)
+	void format(S& out, const C* fmt, Args...args)
+	{
+		if (!fmt)
+		{
+			return;
+		}
+
+		Arg<C> av[] = { args... };
+
+		format(out, fmt, av);
+	}
+
+	template <typename S, typename C = S::char_type, typename L = Literals<C>, size_t N>
+	void format(S& out, const C* fmt, const Arg<C>(&av)[N])
 	{
 		if (!fmt)
 		{
@@ -89,11 +274,9 @@ namespace sb_com
 
 		enum Flags : char
 		{
-			None = 0, LeftJustify = 1, ForceSign = 2, Space = 4, Dash = 8, PadWithZeroes = 16
+			None = 0, LeftJustify = 1, ForceSign = 2, Space = 4, Hash = 8, PadWithZeroes = 16
 		};
 
-		const size_t size = sizeof...(Args);
-		Arg av[] = { args... };
 		int avIdx = 0;
 		while (*fmt)
 		{
@@ -117,11 +300,11 @@ namespace sb_com
 					}
 					else if (ch == L::space)
 					{
-						flags |= Space;
+						flags |= Space; // not supported?
 					}
 					else if (ch == L::hash)
 					{
-						flags |= Dash;
+						flags |= Hash;
 					}
 					else if (ch == L::zero)
 					{
@@ -138,7 +321,7 @@ namespace sb_com
 				int width = 0;
 				if (*fmt == L::star)
 				{
-					width = av[avIdx++].vi;
+					width = av[avIdx++].getInteger();
 					fmt++;
 				}
 				else
@@ -166,7 +349,7 @@ namespace sb_com
 					fmt++;
 					if (*fmt == L::star)
 					{
-						precision = av[avIdx++].vi;
+						precision = av[avIdx++].getInteger();
 						fmt++;
 					}
 					else
@@ -191,56 +374,53 @@ namespace sb_com
 
 				// Read length
 				C ch = *fmt;
-				if (ch)
+				if (ch == L::h)
 				{
-					if (ch == L::h)
+					if (*++fmt == L::h)
 					{
-						if (*++fmt == L::h)
-						{
-							// hh
-							fmt++;
-						}
-						else
-						{
-							// h
-						}
-					}
-					else if (ch == L::l)
-					{
-						if (*++fmt == L::l)
-						{
-							// ll
-							fmt++;
-						}
-						else
-						{
-							// l
-						}
-					}
-					else if (ch == L::j)
-					{
-						// j
+						// hh
 						fmt++;
 					}
-					else if (ch == L::z)
+					else
 					{
-						// z
+						// h
+					}
+				}
+				else if (ch == L::l)
+				{
+					if (*++fmt == L::l)
+					{
+						// ll
 						fmt++;
 					}
-					else if (ch == L::t)
+					else
 					{
-						// t
-						fmt++;
+						// l
 					}
-					else if (ch == L::L)
-					{
-						// L
-						fmt++;
-					}
+				}
+				else if (ch == L::j)
+				{
+					// j
+					fmt++;
+				}
+				else if (ch == L::z)
+				{
+					// z
+					fmt++;
+				}
+				else if (ch == L::t)
+				{
+					// t
+					fmt++;
+				}
+				else if (ch == L::L)
+				{
+					// L
+					fmt++;
 				}
 
 				// Read specifier
-				ch = *fmt++;
+				ch = *fmt;
 				if (ch)
 				{
 					if (width > 0)
@@ -251,33 +431,85 @@ namespace sb_com
 					{
 						out.precision(precision);
 					}
-					out.fill(flags & PadWithZeroes ? L::zero : L::space);
+					// Reset stream flags
+					out.flags(std::ios_base::dec | std::ios_base::right | std::ios_base::fixed);
 
+					out.fill(flags & PadWithZeroes ? L::zero : L::space);
+					if (flags & ForceSign)
+					{
+						out.setf(std::ios_base::showpos);
+					}
+					if (flags & LeftJustify)
+					{
+						out.setf(std::ios_base::left, std::ios_base::adjustfield);
+					}
+					else if (flags & PadWithZeroes)
+					{
+						out.setf(std::ios_base::internal, std::ios_base::adjustfield);
+					}
+
+					// Format argument(s) accordingly and write to output
 					switch (ch)
 					{
 					case L::d:
 					case L::i:
-						out << std::dec << av[avIdx++].vi;
+						av[avIdx++].put(out);
+						break;
+
+					case L::u:
+						av[avIdx++].putUnsigned(out);
+						break;
+
+					case L::A:
+						out.setf(std::ios_base::uppercase);
+					case L::a:
+						out.setf(std::ios_base::fixed | std::ios_base::scientific, std::ios_base::floatfield);
+						av[avIdx++].put(out);
+						break;
+
+					case L::o:
+						out.setf(std::ios_base::oct, std::ios_base::basefield);
+						av[avIdx++].putUnsigned(out);
+						break;
+
+					case L::X:
+						out.setf(std::ios_base::uppercase);
+					case L::x:
+						out.setf(std::ios_base::hex, std::ios_base::basefield);
+						if (flags & Hash)
+						{
+							out << "0x";
+						}
+						av[avIdx++].putUnsigned(out);
 						break;
 
 					case L::F:
 						out.setf(std::ios_base::uppercase);
 					case L::f:
-						out << std::fixed << av[avIdx++].vd;
+						out.setf(std::ios_base::fixed, std::ios_base::floatfield);
+						av[avIdx++].put(out);
 						break;
 
 					case L::E:
 						out.setf(std::ios_base::uppercase);
 					case L::e:
-						out << std::scientific << av[avIdx++].vd;
+						out.setf(std::ios_base::scientific, std::ios_base::floatfield);
+						av[avIdx++].put(out);
 						break;
 
 					default:
 						throw format_error("Unknown specifier: " + std::to_string(ch));
 					}
 				}
-
-				// Format argument(s) accordingly and write to output
+				else
+				{
+					break; // \0 encountered
+				}
+				fmt++;
+				if (!*fmt)
+				{
+					break;
+				}
 			}
 			out.put(*fmt++);
 		}
