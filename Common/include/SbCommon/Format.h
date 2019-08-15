@@ -72,19 +72,19 @@ namespace sb_com
 				return i;
 
 			case UnsignedInteger:
-				return ui;
+				return static_cast<int>(ui);
 
 			case Long:
-				return l;
+				return static_cast<int>(l);
 
 			case UnsignedLong:
-				return ul;
+				return static_cast<int>(ul);
 
 			case LongLong:
-				return ll;
+				return static_cast<int>(ll);
 
 			case UnsignedLongLong:
-				return ull;
+				return static_cast<int>(ull);
 
 			default:
 				throw format_error("Not an integer: " + std::to_string(kind));
@@ -191,6 +191,10 @@ namespace sb_com
 				out << static_cast<unsigned>(vc);
 				break;
 
+			case Pointer:
+				out << ptr;
+				break;
+
 			default:
 				throw format_error("Not a number!");
 			}
@@ -226,6 +230,7 @@ namespace sb_com
 		const static C dot = static_cast<C>('.');
 		const static C a = static_cast<C>('a');
 		const static C A = static_cast<C>('A');
+		const static C c = static_cast<C>('c');
 		const static C d = static_cast<C>('d');
 		const static C e = static_cast<C>('e');
 		const static C E = static_cast<C>('E');
@@ -236,7 +241,9 @@ namespace sb_com
 		const static C l = static_cast<C>('l');
 		const static C j = static_cast<C>('j');
 		const static C z = static_cast<C>('z');
+		const static C s = static_cast<C>('s');
 		const static C t = static_cast<C>('t');
+		const static C p = static_cast<C>('p');
 		const static C L = static_cast<C>('L');
 		const static C u = static_cast<C>('u');
 		const static C o = static_cast<C>('o');
@@ -460,6 +467,10 @@ namespace sb_com
 						av[avIdx++].putUnsigned(out);
 						break;
 
+					case L::s:
+						av[avIdx++].put(out);
+						break;
+
 					case L::A:
 						out.setf(std::ios_base::uppercase);
 					case L::a:
@@ -472,6 +483,7 @@ namespace sb_com
 						av[avIdx++].putUnsigned(out);
 						break;
 
+					case L::p:
 					case L::X:
 						out.setf(std::ios_base::uppercase);
 					case L::x:
@@ -497,6 +509,10 @@ namespace sb_com
 						av[avIdx++].put(out);
 						break;
 
+					case L::c:
+						av[avIdx++].put(out);
+						break;
+
 					default:
 						throw format_error("Unknown specifier: " + std::to_string(ch));
 					}
@@ -506,12 +522,11 @@ namespace sb_com
 					break; // \0 encountered
 				}
 				fmt++;
-				if (!*fmt)
-				{
-					break;
-				}
 			}
-			out.put(*fmt++);
+			else
+			{
+				out.put(*fmt++);
+			}
 		}
 	}
 }

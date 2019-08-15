@@ -1,8 +1,9 @@
 #include "SbCommon/Format.h"
 #include "gtest/gtest.h"
 #include <iostream>
-#include <iomanip>
 #include <cstdio>
+#include <ctime>
+#include <regex>
 
 using namespace std::string_literals;
 
@@ -87,6 +88,22 @@ TEST(Format, Scientific)
 	ASSERT_EQ("-3.1E+00  3.15e+00"s, s.str());
 }
 
+TEST(Format, Pointer)
+{
+	std::ostringstream s;
+
+	int* p1 = (int*)0xabcd;
+	void* p2 = (void*)0xbeef;
+
+	sb_com::format(s, "%p %p", p1, p2);
+
+	std::string result = s.str();
+	std::regex re{"[0]+ABCD [0]+BEEF"};
+	std::cmatch m;
+
+	ASSERT_TRUE(std::regex_match(result.c_str(), m, re));
+}
+
 TEST(Format, NoArgs)
 {
 	std::ostringstream s;
@@ -94,4 +111,60 @@ TEST(Format, NoArgs)
 	sb_com::format(s, "abc");
 
 	ASSERT_EQ("abc"s, s.str());
+}
+
+TEST(Format, Char)
+{
+	std::ostringstream s;
+
+	sb_com::format(s, "%c%c%c", 'a', 'b', 'c');
+
+	ASSERT_EQ("abc"s, s.str());
+}
+
+TEST(Format, String)
+{
+	std::ostringstream s;
+
+	sb_com::format(s, "%s%s%s", "a", "b", "c");
+
+	ASSERT_EQ("abc"s, s.str());
+}
+
+TEST(Format, DISABLED_Perormance)
+{
+	{
+		size_t counter = 0;
+		std::ostringstream s;
+
+		clock_t begin = clock();
+		for (int i = 0; i < 10000; i++)
+		{
+			s.str("");
+			s.clear();
+			sb_com::format(s, "%i %u %f", i, i, double(i));
+			counter += s.tellp();
+		}
+		clock_t end = clock();
+		double elapsed_secs = (double(end) - begin) / CLOCKS_PER_SEC;
+		std::cout << "Elapsed time: " << elapsed_secs << ", written " << counter << std::endl;
+	}
+
+	{
+		size_t counter = 0;
+		char buf[1000];
+
+		clock_t begin = clock();
+		for (int i = 0; i < 10000; i++)
+		{
+			int r = sprintf(buf, "%i %u %f", i, i, double(i));
+			if (r > 0)
+			{
+				counter += r;
+			}
+		}
+		clock_t end = clock();
+		double elapsed_secs = (double(end) - begin) / CLOCKS_PER_SEC;
+		std::cout << "Elapsed time: " << elapsed_secs << ", written " << counter << std::endl;
+	}
 }
