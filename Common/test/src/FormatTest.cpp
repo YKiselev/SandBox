@@ -7,6 +7,24 @@
 
 using namespace std::string_literals;
 
+TEST(Format, TooManySpecifiers)
+{
+	try
+	{
+		std::ostringstream s;
+
+		sb_com::format(s, "%i");
+
+		sb_com::format(s, "%i %d", 1);
+
+		FAIL();
+	}
+	catch (sb_com::format_error& ex)
+	{
+		// ok
+	}
+}
+
 TEST(Format, Mixed)
 {
 	std::ostringstream s;
@@ -98,7 +116,7 @@ TEST(Format, Pointer)
 	sb_com::format(s, "%p %p", p1, p2);
 
 	std::string result = s.str();
-	std::regex re{"[0]+ABCD [0]+BEEF"};
+	std::regex re{ "[0]+ABCD [0]+BEEF" };
 	std::cmatch m;
 
 	ASSERT_TRUE(std::regex_match(result.c_str(), m, re));
@@ -111,6 +129,15 @@ TEST(Format, NoArgs)
 	sb_com::format(s, "abc");
 
 	ASSERT_EQ("abc"s, s.str());
+}
+
+TEST(Format, NullFormat)
+{
+	std::ostringstream s;
+
+	sb_com::format(s, static_cast<char*>(nullptr));
+
+	ASSERT_EQ(""s, s.str());
 }
 
 TEST(Format, Char)
@@ -130,8 +157,8 @@ TEST(Format, String)
 
 	ASSERT_EQ("abc"s, s.str());
 }
-
-TEST(Format, DISABLED_Perormance)
+//DISABLED_
+TEST(Format, Perormance)
 {
 	{
 		size_t counter = 0;

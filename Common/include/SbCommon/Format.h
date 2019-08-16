@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <tuple>
 
 namespace sb_com
 {
@@ -17,6 +18,110 @@ namespace sb_com
 		{
 		}
 	};
+
+	template <typename S, typename V, typename std::enable_if_t<!std::is_integral_v<V>, int> = 0>
+	void putUnsigned2(S & out, V value)
+	{
+		throw format_error("Not integral type!");
+	}
+
+	template <typename S, typename V, typename std::enable_if_t<std::is_integral_v<V>, int> = 0>
+	void putUnsigned2(S & out, V value)
+	{
+		out << static_cast<std::make_unsigned<V>::type>(value);
+	}
+
+	template <typename V, typename std::enable_if_t<!std::is_integral_v<V>, int> = 0>
+	int asInteger(V value)
+	{
+		throw format_error("Not integral type!");
+	}
+
+	template <typename V, typename std::enable_if_t<std::is_integral_v<V>, int> = 0>
+	int asInteger(V value)
+	{
+		return static_cast<int>(value);
+	}
+
+	template <typename... Tail>
+	struct X
+	{
+		template <typename S>
+		void put(S& out, int index) const
+		{
+			throw format_error("Insufficient number of arguments!");
+		}
+
+		template <typename S>
+		void putUnsigned(S& out, int index) const
+		{
+			throw format_error("Insufficient number of arguments!");
+		}
+
+		int getInteger(int index) const
+		{
+			throw format_error("Insufficient number of arguments!");
+		}
+	};
+
+	template <typename T, typename... Tail>
+	struct X<T, Tail...> : private X<Tail...>
+	{
+		using Base = X<Tail...>;
+
+		X(T v, Tail...tail) : value{ v }, Base{ tail... }
+		{
+		}
+
+		template <typename S>
+		void put(S& out, int index)
+		{
+			if (index == 0)
+			{
+				out << value;
+			}
+			else
+			{
+				Base::put(out, index - 1);
+			}
+		}
+
+		template <typename S>
+		void putUnsigned(S& out, int index)
+		{
+			if (index == 0)
+			{
+				putUnsigned2(out, value);
+			}
+			else
+			{
+				Base::putUnsigned(out, index - 1);
+			}
+
+		}
+
+		int getInteger(int index) const
+		{
+			if (index == 0)
+			{
+				return asInteger(value);
+			}
+			else
+			{
+				return Base::getInteger(index - 1);
+			}
+		}
+
+	private:
+		T value;
+
+	};
+
+	template <typename...T>
+	X<T...> make_x(T...args)
+	{
+		return X<T...>(args...);
+	}
 
 	template <typename C>
 	struct Arg
@@ -64,7 +169,7 @@ namespace sb_com
 		{
 		}
 
-		inline int getInteger() const
+		int getInteger() const
 		{
 			switch (kind)
 			{
@@ -143,6 +248,9 @@ namespace sb_com
 			case Pointer:
 				out << ptr;
 				break;
+
+			default:
+				throw format_error("Unsupported value!");
 			}
 		}
 
@@ -255,7 +363,10 @@ namespace sb_com
 	template <typename S, typename C = S::char_type>
 	void format(S & out, const C * fmt)
 	{
-		out << fmt;
+		if (fmt)
+		{
+			out << fmt;
+		}
 	}
 
 	template <typename S, typename C = S::char_type, typename L = Literals<C>, typename... Args>
@@ -266,23 +377,34 @@ namespace sb_com
 			return;
 		}
 
-		Arg<C> av[] = { args... };
+		//Arg<C> av[] = { args... };
+		auto av = make_x(args...);
 
 		format(out, fmt, av);
 	}
 
-	template <typename S, typename C = S::char_type, typename L = Literals<C>, size_t N>
-	void format(S& out, const C* fmt, const Arg<C>(&av)[N])
+	enum Flags : char
+	{
+		None = 0, LeftJustify = 1, ForceSign = 2, Space = 4, Hash = 8, PadWithZeroes = 16
+	};
+
+	//template <typename S, typename C = S::char_type, typename L = Literals<C>, size_t N>
+	//void format(S& out, const C* fmt, const Arg<C>(&av)[N])
+	template <typename S, typename... Args, typename C = S::char_type, typename L = Literals<C>>
+	void format(S & out, const C * fmt, X<Args...> & av)
 	{
 		if (!fmt)
 		{
 			return;
 		}
 
-		enum Flags : char
-		{
-			None = 0, LeftJustify = 1, ForceSign = 2, Space = 4, Hash = 8, PadWithZeroes = 16
-		};
+		//auto argument = [&](int index) -> const Arg<C> & {
+		//	if (index >= N)
+		//	{
+		//		throw format_error("Index is out of range: " + std::to_string(index));
+		//	}
+		//	return av[index];
+		//};
 
 		int avIdx = 0;
 		while (*fmt)
@@ -328,7 +450,8 @@ namespace sb_com
 				int width = 0;
 				if (*fmt == L::star)
 				{
-					width = av[avIdx++].getInteger();
+					//width = argument(avIdx++).getInteger();
+					width = av.getInteger(avIdx++);
 					fmt++;
 				}
 				else
@@ -356,7 +479,7 @@ namespace sb_com
 					fmt++;
 					if (*fmt == L::star)
 					{
-						precision = av[avIdx++].getInteger();
+						precision = av.getInteger(avIdx++);
 						fmt++;
 					}
 					else
@@ -370,7 +493,6 @@ namespace sb_com
 							}
 							if (ch < L::zero || ch > L::nine)
 							{
-
 								break;
 							}
 							precision = 10 * precision + static_cast<int>(ch - L::zero);
@@ -456,34 +578,34 @@ namespace sb_com
 					}
 
 					// Format argument(s) accordingly and write to output
+					//const Arg<C>& a = argument(avIdx++);
 					switch (ch)
 					{
 					case L::d:
 					case L::i:
-						av[avIdx++].put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::u:
-						av[avIdx++].putUnsigned(out);
+						av.putUnsigned(out, avIdx++);
 						break;
 
 					case L::s:
-						av[avIdx++].put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::A:
 						out.setf(std::ios_base::uppercase);
 					case L::a:
 						out.setf(std::ios_base::fixed | std::ios_base::scientific, std::ios_base::floatfield);
-						av[avIdx++].put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::o:
 						out.setf(std::ios_base::oct, std::ios_base::basefield);
-						av[avIdx++].putUnsigned(out);
+						av.putUnsigned(out, avIdx++);
 						break;
 
-					case L::p:
 					case L::X:
 						out.setf(std::ios_base::uppercase);
 					case L::x:
@@ -492,25 +614,29 @@ namespace sb_com
 						{
 							out << "0x";
 						}
-						av[avIdx++].putUnsigned(out);
+						av.putUnsigned(out, avIdx++);
+						break;
+
+					case L::p:
+						av.put(out, avIdx++);
 						break;
 
 					case L::F:
 						out.setf(std::ios_base::uppercase);
 					case L::f:
 						out.setf(std::ios_base::fixed, std::ios_base::floatfield);
-						av[avIdx++].put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::E:
 						out.setf(std::ios_base::uppercase);
 					case L::e:
 						out.setf(std::ios_base::scientific, std::ios_base::floatfield);
-						av[avIdx++].put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::c:
-						av[avIdx++].put(out);
+						av.put(out, avIdx++);
 						break;
 
 					default:
