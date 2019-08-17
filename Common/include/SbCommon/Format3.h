@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 namespace sb_com
 {
@@ -18,206 +19,100 @@ namespace sb_com
 		}
 	};
 
-	template <typename C>
-	struct Arg
+	template <typename... Tail>
+	struct Arguments
 	{
-		enum Kind
+		template <typename S>
+		void put(S& out, int index) const
 		{
-			None, Integer, UnsignedInteger, Long, UnsignedLong, LongLong, UnsignedLongLong, Double, LongDouble, Float, Char, Cstr, Pointer
-		};
-		const Kind kind;
+			throw format_error("Insufficient number of arguments!");
+		}
 
-		Arg(int v) : i{ v }, kind{ Integer }
+		template <typename S>
+		void putUnsigned(S& out, int index) const
 		{
+			throw format_error("Insufficient number of arguments!");
 		}
-		Arg(unsigned int v) : ui{ v }, kind{ UnsignedInteger }
+
+		int getInteger(int index) const
 		{
+			throw format_error("Insufficient number of arguments!");
 		}
-		Arg(long v) : l{ v }, kind{ Long }
-		{
-		}
-		Arg(unsigned long v) : ul{ v }, kind{ UnsignedLong }
-		{
-		}
-		Arg(long long v) : ll{ v }, kind{ LongLong }
-		{
-		}
-		Arg(unsigned long long v) : ull{ v }, kind{ UnsignedLongLong }
-		{
-		}
-		Arg(double v) : vd{ v }, kind{ Double }
-		{
-		}
-		Arg(long double v) : vld{ v }, kind{ LongDouble }
-		{
-		}
-		Arg(float v) : vf{ v }, kind{ Float }
-		{
-		}
-		Arg(C v) : vc{ v }, kind{ Char }
-		{
-		}
-		Arg(const C* v) : cstr{ v }, kind{ Cstr }
-		{
-		}
-		Arg(void* v) : ptr{ v }, kind{ Pointer }
+	};
+
+	template <typename T, typename... Tail>
+	struct Arguments<T, Tail...> : private Arguments<Tail...>
+	{
+		using Base = Arguments<Tail...>;
+
+		Arguments(T v, Tail...tail) : value{ v }, Base{ tail... }
 		{
 		}
 
-		int getInteger() const
+		template <typename S>
+		void put(S& out, int index)
 		{
-			switch (kind)
+			if (index == 0)
 			{
-			case Integer:
-				return i;
-
-			case UnsignedInteger:
-				return static_cast<int>(ui);
-
-			case Long:
-				return static_cast<int>(l);
-
-			case UnsignedLong:
-				return static_cast<int>(ul);
-
-			case LongLong:
-				return static_cast<int>(ll);
-
-			case UnsignedLongLong:
-				return static_cast<int>(ull);
-
-			default:
-				throw format_error("Not an integer: " + std::to_string(kind));
+				out << value;
+			}
+			else
+			{
+				Base::put(out, index - 1);
 			}
 		}
 
 		template <typename S>
-		void put(S& out) const
+		void putUnsigned(S& out, int index)
 		{
-			switch (kind)
+			if (index == 0)
 			{
-			case Integer:
-				out << i;
-				break;
-
-			case UnsignedInteger:
-				out << ui;
-				break;
-
-			case Long:
-				out << l;
-				break;
-
-			case UnsignedLong:
-				out << ul;
-				break;
-
-			case LongLong:
-				out << ll;
-				break;
-
-			case UnsignedLongLong:
-				out << ull;
-				break;
-
-			case Double:
-				out << vd;
-				break;
-
-			case LongDouble:
-				out << vld;
-				break;
-
-			case Float:
-				out << vf;
-				break;
-
-			case Char:
-				out << vc;
-				break;
-
-			case Cstr:
-				out << cstr;
-				break;
-
-			case Pointer:
-				out << ptr;
-				break;
-
-			default:
-				throw format_error("Unsupported value!");
+				putAsUnsigned(out, value);
+			}
+			else
+			{
+				Base::putUnsigned(out, index - 1);
 			}
 		}
 
-		template <typename S>
-		void putUnsigned(S& out) const
+		int getInteger(int index) const
 		{
-			switch (kind)
+			if (index == 0)
 			{
-			case Integer:
-				out << static_cast<unsigned>(i);
-				break;
-
-			case UnsignedInteger:
-				out << ui;
-				break;
-
-			case Long:
-				out << static_cast<unsigned long>(l);
-				break;
-
-			case UnsignedLong:
-				out << ul;
-				break;
-
-			case LongLong:
-				out << static_cast<unsigned long long>(ll);
-				break;
-
-			case UnsignedLongLong:
-				out << ull;
-				break;
-
-			case Double:
-				out << static_cast<uintmax_t>(vd);
-				break;
-
-			case LongDouble:
-				out << static_cast<uintmax_t>(vld);
-				break;
-
-			case Float:
-				out << static_cast<uintmax_t>(vf);
-				break;
-
-			case Char:
-				out << static_cast<unsigned>(vc);
-				break;
-
-			case Pointer:
-				out << ptr;
-				break;
-
-			default:
-				throw format_error("Not a number!");
+				return asInteger(value);
+			}
+			else
+			{
+				return Base::getInteger(index - 1);
 			}
 		}
+
 	private:
-		union
+		const T value;
+
+		template <typename V, typename std::enable_if_t<!std::is_integral_v<V>, int> = 0>
+		static int asInteger(V value)
 		{
-			int i;
-			unsigned ui;
-			long l;
-			unsigned long ul;
-			long long ll;
-			unsigned long long ull;
-			float vf;
-			double vd;
-			long double vld;
-			C vc;
-			const C* cstr;
-			void* ptr;
-		};
+			throw format_error("Not integral type!");
+		}
+
+		template <typename V, typename std::enable_if_t<std::is_integral_v<V>, int> = 0>
+		static int asInteger(V value)
+		{
+			return static_cast<int>(value);
+		}
+
+		template <typename S, typename V, typename std::enable_if_t<!std::is_integral_v<V>, int> = 0>
+		static void putAsUnsigned(S & out, V value)
+		{
+			throw format_error("Not integral type!");
+		}
+
+		template <typename S, typename V, typename std::enable_if_t<std::is_integral_v<V>, int> = 0>
+		static void putAsUnsigned(S & out, V value)
+		{
+			out << static_cast<typename std::make_unsigned<V>::type>(value);
+		}
 	};
 
 	template <typename C>
@@ -272,7 +167,7 @@ namespace sb_com
 			return;
 		}
 
-		Arg<C> av[] = { args... };
+		auto av = Arguments<Args...>(args...);
 
 		format(out, fmt, av);
 	}
@@ -282,21 +177,13 @@ namespace sb_com
 		None = 0, /*LeftJustify = 1, ForceSign = 2, Space = 4,*/ Hash = 8//, PadWithZeroes = 16
 	};
 
-	template <typename S, typename C = S::char_type, typename L = Literals<C>, size_t N>
-	void format(S& out, const C* fmt, const Arg<C>(&av)[N])
+	template <typename S, typename... Args, typename C = S::char_type, typename L = Literals<C>>
+	void format(S & out, const C * fmt, Arguments<Args...> & av)
 	{
 		if (!fmt)
 		{
 			return;
 		}
-
-		auto argument = [&](int index) -> const Arg<C> & {
-			if (index >= N)
-			{
-				throw format_error("Index is out of range: " + std::to_string(index));
-			}
-			return av[index];
-		};
 
 		int avIdx = 0;
 		while (*fmt)
@@ -347,7 +234,7 @@ namespace sb_com
 				int width = 0;
 				if (*fmt == L::star)
 				{
-					width = argument(avIdx++).getInteger();
+					width = av.getInteger(avIdx++);
 					fmt++;
 				}
 				else
@@ -375,7 +262,7 @@ namespace sb_com
 					fmt++;
 					if (*fmt == L::star)
 					{
-						precision = argument(avIdx++).getInteger();
+						precision = av.getInteger(avIdx++);
 						fmt++;
 					}
 					else
@@ -453,32 +340,31 @@ namespace sb_com
 					out.fill(padding);
 
 					// Format argument(s) accordingly and write to output
-					const Arg<C>& a = argument(avIdx++);
 					switch (ch)
 					{
 					case L::d:
 					case L::i:
-						a.put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::u:
-						a.putUnsigned(out);
+						av.putUnsigned(out, avIdx++);
 						break;
 
 					case L::s:
-						a.put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::A:
 						out.setf(std::ios_base::uppercase);
 					case L::a:
 						out.setf(std::ios_base::fixed | std::ios_base::scientific, std::ios_base::floatfield);
-						a.put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::o:
 						out.setf(std::ios_base::oct, std::ios_base::basefield);
-						a.putUnsigned(out);
+						av.putUnsigned(out, avIdx++);
 						break;
 
 					case L::X:
@@ -489,29 +375,29 @@ namespace sb_com
 						{
 							out << "0x";
 						}
-						a.putUnsigned(out);
+						av.putUnsigned(out, avIdx++);
 						break;
 
 					case L::p:
-						a.put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::F:
 						out.setf(std::ios_base::uppercase);
 					case L::f:
 						out.setf(std::ios_base::fixed, std::ios_base::floatfield);
-						a.put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::E:
 						out.setf(std::ios_base::uppercase);
 					case L::e:
 						out.setf(std::ios_base::scientific, std::ios_base::floatfield);
-						a.put(out);
+						av.put(out, avIdx++);
 						break;
 
 					case L::c:
-						a.put(out);
+						av.put(out, avIdx++);
 						break;
 
 					default:

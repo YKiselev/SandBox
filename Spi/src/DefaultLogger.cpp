@@ -6,13 +6,13 @@ namespace
 	{
 	public:
 		DefaultLogger();
-		virtual ~DefaultLogger() override;
+		~DefaultLogger() override;
 
-		virtual void level(Level level) override;
-		virtual Level level() override;
+		void level(Level level) override;
+		Level level() override;
 
 	protected:
-		virtual void doLog(Level level, const char* fmt, ...) override;
+		void doLog(Level level, const char* fmt, ...) override;
 
 	private:
 		Level _level;

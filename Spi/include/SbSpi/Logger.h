@@ -12,8 +12,12 @@ namespace sb_spi
 		{
 			Trace, Debug, Message, Warning, Error
 		};
+		
+		Logger() = default;
+		Logger(const Logger&) = delete;
+		virtual ~Logger() = default;
 
-		virtual ~Logger() {};
+		Logger& operator =(const Logger&) = delete;
 
 		template <typename... Args>
 		void trace(const char* fmt, Args...args);
@@ -117,7 +121,11 @@ namespace sb_spi
 	class LoggerFactory
 	{
 	public:
-		virtual ~LoggerFactory() {};
+		LoggerFactory() = default;
+		LoggerFactory(const LoggerFactory&) = delete;
+		virtual ~LoggerFactory() = default;
+
+		LoggerFactory& operator = (const LoggerFactory&) = delete;
 
 		virtual std::shared_ptr<Logger> getLogger(const char* name) = 0;
 	};

@@ -11,6 +11,7 @@ target_include_directories(SbCommon PUBLIC
 
 add_subdirectory(test)
 
+
 # Library publishing stuff
 #[[
 install(TARGETS SbCommon EXPORT SbCommonTargets

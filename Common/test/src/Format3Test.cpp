@@ -1,4 +1,4 @@
-#include "SbCommon/Format.h"
+#include "SbCommon/Format3.h"
 #include "gtest/gtest.h"
 #include <iostream>
 #include <cstdio>
@@ -7,7 +7,7 @@
 
 using namespace std::string_literals;
 
-TEST(Format, TooManySpecifiers)
+TEST(Format3, TooManySpecifiers)
 {
 	try
 	{
@@ -25,7 +25,7 @@ TEST(Format, TooManySpecifiers)
 	}
 }
 
-TEST(Format, Mixed)
+TEST(Format3, Mixed)
 {
 	std::ostringstream s;
 
@@ -34,7 +34,7 @@ TEST(Format, Mixed)
 	ASSERT_EQ("abc 123 def"s, s.str());
 }
 
-TEST(Format, Integers)
+TEST(Format3, Integers)
 {
 	std::ostringstream s;
 
@@ -43,7 +43,7 @@ TEST(Format, Integers)
 	ASSERT_EQ("1 1 1 1 1 1"s, s.str());
 }
 
-TEST(Format, Unsigned)
+TEST(Format3, Unsigned)
 {
 	std::ostringstream s;
 
@@ -52,7 +52,7 @@ TEST(Format, Unsigned)
 	ASSERT_EQ("4294967295 4294967295 18446744073709551615 1 1 1"s, s.str());
 }
 
-TEST(Format, Octal)
+TEST(Format3, Octal)
 {
 	std::ostringstream s;
 
@@ -61,7 +61,7 @@ TEST(Format, Octal)
 	ASSERT_EQ("11 11 11 11 11 11"s, s.str());
 }
 
-TEST(Format, Hexadecimal)
+TEST(Format3, Hexadecimal)
 {
 	std::ostringstream s;
 
@@ -70,7 +70,7 @@ TEST(Format, Hexadecimal)
 	ASSERT_EQ("0xFFFFFFFF 0xFFFFFFFF 0xFFFFFFFFFFFFFFFF 0x11 0x11 0x11"s, s.str());
 }
 
-TEST(Format, Floats)
+TEST(Format3, Floats)
 {
 	std::ostringstream s;
 
@@ -79,7 +79,7 @@ TEST(Format, Floats)
 	ASSERT_EQ("1.000000 1.000000 1.000000"s, s.str());
 }
 
-TEST(Format, HexadecimalFloats)
+TEST(Format3, HexadecimalFloats)
 {
 	std::ostringstream s;
 
@@ -88,7 +88,7 @@ TEST(Format, HexadecimalFloats)
 	ASSERT_EQ("0X1.547AE1P+0 0x1.547ae2p+0 0x1.547ae1p+0"s, s.str());
 }
 
-TEST(Format, Fixed)
+TEST(Format3, Fixed)
 {
 	std::ostringstream s;
 
@@ -97,7 +97,7 @@ TEST(Format, Fixed)
 	ASSERT_EQ("-003.142_-3.15"s, s.str());
 }
 
-TEST(Format, Scientific)
+TEST(Format3, Scientific)
 {
 	std::ostringstream s;
 
@@ -106,7 +106,7 @@ TEST(Format, Scientific)
 	ASSERT_EQ("-3.1E+00  3.15e+00"s, s.str());
 }
 
-TEST(Format, Pointer)
+TEST(Format3, Pointer)
 {
 	std::ostringstream s;
 
@@ -122,7 +122,7 @@ TEST(Format, Pointer)
 	ASSERT_TRUE(std::regex_match(result.c_str(), m, re));
 }
 
-TEST(Format, NoArgs)
+TEST(Format3, NoArgs)
 {
 	std::ostringstream s;
 
@@ -131,7 +131,7 @@ TEST(Format, NoArgs)
 	ASSERT_EQ("abc"s, s.str());
 }
 
-TEST(Format, NullFormat)
+TEST(Format3, NullFormat)
 {
 	std::ostringstream s;
 
@@ -140,7 +140,7 @@ TEST(Format, NullFormat)
 	ASSERT_EQ(""s, s.str());
 }
 
-TEST(Format, Char)
+TEST(Format3, Char)
 {
 	std::ostringstream s;
 
@@ -149,7 +149,7 @@ TEST(Format, Char)
 	ASSERT_EQ("abc"s, s.str());
 }
 
-TEST(Format, String)
+TEST(Format3, String)
 {
 	std::ostringstream s;
 
@@ -158,7 +158,7 @@ TEST(Format, String)
 	ASSERT_EQ("abc"s, s.str());
 }
 //DISABLED_
-TEST(Format, Perormance)
+TEST(Format3, Perormance)
 {
 	const int iterations = 150000, tries = 3;
 	double avg1 = 0, avg2 = 0;
@@ -179,7 +179,7 @@ TEST(Format, Perormance)
 			clock_t end = clock();
 			double elapsed_secs = (double(end) - begin) / CLOCKS_PER_SEC;
 			avg1 += elapsed_secs;
-			std::cout << "Elapsed time (format): " << elapsed_secs << ", written " << counter << std::endl;
+			std::cout << "Elapsed time (format3): " << elapsed_secs << ", written " << counter << std::endl;
 		}
 
 		{
@@ -201,5 +201,5 @@ TEST(Format, Perormance)
 			std::cout << "Elapsed time (sprintf): " << elapsed_secs << ", written " << counter << std::endl;
 		}
 	}
-	std::cout << "Avg Elapsed time (format): " << (avg1 / tries) << ", (sprintf) " << (avg2 / tries) << std::endl;
+	std::cout << "Avg Elapsed time (format3): " << (avg1 / tries) << ", (sprintf) " << (avg2 / tries) << std::endl;
 }

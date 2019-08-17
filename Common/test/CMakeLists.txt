@@ -6,6 +6,8 @@ add_executable(SbCommonTests
 	src/FormatBufferTest.cpp
 	src/StringConversionTest.cpp
 	src/FormatTest.cpp
+	src/Format2Test.cpp
+	src/Format3Test.cpp
 )
 
 target_link_libraries(SbCommonTests 
@@ -15,10 +17,11 @@ target_link_libraries(SbCommonTests
 )
 
 gtest_discover_tests(SbCommonTests)
-
+#[[
 add_custom_command(
      TARGET SbCommonTests
      COMMENT "Run tests"
      POST_BUILD 
      COMMAND SbCommonTests
 )
+]]
