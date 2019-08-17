@@ -5,7 +5,7 @@
 #include <string>
 
 
-namespace sb_com
+namespace sb_com2
 {
 	class format_error : public std::runtime_error
 	{
@@ -97,6 +97,219 @@ namespace sb_com
 			return static_cast<int>(value);
 		}
 
+		template <typename S, typename... A, typename C = S::char_type, typename L = Literals<C>>
+		void format(S & out, const C * fmt, const Arguments<A...> & av, size_t length)
+		{
+			if (!fmt)
+			{
+				return;
+			}
+
+			int argumentNumber = 0, indexToUse = 0;
+			bool quoted = false;
+			while (*fmt)
+			{
+				int flags = None, width = 0, precision = 0;
+				C padding = L::space;
+
+				// We need to search passed format string for placeholders of the form 
+				// {[index[:[flags][width][.precision][specifier]]]}
+				// any characters inside single quotes '{abc}' are treated as text (not a placeholder). 
+				// Any two consecutive single quotes is an escaped single quote.
+				if (*fmt == L::squote && *++fmt != L::squote)
+				{
+					quoted = !quoted;
+				}
+
+				if (quoted)
+				{
+					out.put(*fmt++);
+					continue;
+				}
+
+				if (*fmt == L::ocbrace)
+				{
+					fmt++;
+
+					// Reset stream flags
+					out.flags(std::ios_base::dec | std::ios_base::internal | std::ios_base::fixed);
+
+					// Read index
+					int index = 0, digits = 0;
+					while (*fmt)
+					{
+						const C ch = *fmt;
+						if (ch < L::zero || ch > L::nine)
+						{
+							break;
+						}
+						index = 10 * index + static_cast<int>(ch - L::zero);
+						digits++;
+						fmt++;
+					}
+					if (digits == 0)
+					{
+						indexToUse = argumentNumber;
+					}
+					else
+					{
+						indexToUse = index;
+					}
+
+					if (*fmt == L::colon)
+					{
+						fmt++;
+
+						// Read flags
+						while (*fmt)
+						{
+							const C ch = *fmt;
+							if (ch == L::minus)
+							{
+								out.setf(std::ios_base::left, std::ios_base::adjustfield);
+							}
+							else if (ch == L::plus)
+							{
+								out.setf(std::ios_base::showpos);
+							}
+							else if (ch == L::space)
+							{
+								//flags |= Space; // not supported?
+							}
+							else if (ch == L::hash)
+							{
+								flags |= Hash;
+							}
+							else if (ch == L::zero)
+							{
+								padding = L::zero;
+							}
+							else
+							{
+								break; // no more flags
+							}
+							fmt++;
+						}
+
+						// Read width
+						if (*fmt == L::star)
+						{
+							// todo ?????? width = av.map(avIdx++, toInteger);
+							fmt++;
+						}
+						else
+						{
+							if (width == 0 && *fmt == L::zero)
+							{
+								throw format_error("Wrong width!");
+							}
+							while (*fmt)
+							{
+								const C ch = *fmt;
+								if (ch < L::zero || ch > L::nine)
+								{
+									break;
+								}
+								width = 10 * width + static_cast<int>(ch - L::zero);
+								fmt++;
+							}
+						}
+
+						// Read precision
+						if (*fmt == L::dot)
+						{
+							fmt++;
+							if (*fmt == L::star)
+							{
+								// todo precision = av.map(avIdx++, toInteger);
+								fmt++;
+							}
+							else
+							{
+								while (*fmt)
+								{
+									const C ch = *fmt;
+									if (precision == 0 && ch == L::zero)
+									{
+										throw format_error("Wrong precision!");
+									}
+									if (ch < L::zero || ch > L::nine)
+									{
+										break;
+									}
+									precision = 10 * precision + static_cast<int>(ch - L::zero);
+									fmt++;
+								}
+							}
+						}
+
+						// Format argument(s) accordingly and write to output
+						switch (*fmt)
+						{
+						case L::A:
+							out.setf(std::ios_base::uppercase);
+						case L::a:
+							out.setf(std::ios_base::fixed | std::ios_base::scientific, std::ios_base::floatfield);
+							break;
+
+						case L::o:
+							out.setf(std::ios_base::oct, std::ios_base::basefield);
+							break;
+
+						case L::X:
+							out.setf(std::ios_base::uppercase);
+						case L::x:
+							out.setf(std::ios_base::hex, std::ios_base::basefield);
+							if (flags & Hash)
+							{
+								out << "0x";
+							}
+							break;
+
+						case L::F:
+							out.setf(std::ios_base::uppercase);
+						case L::f:
+							out.setf(std::ios_base::fixed, std::ios_base::floatfield);
+							break;
+
+						case L::E:
+							out.setf(std::ios_base::uppercase);
+						case L::e:
+							out.setf(std::ios_base::scientific, std::ios_base::floatfield);
+							break;
+
+						default:
+							throw format_error("Unknown specifier: " + std::to_string(*fmt));
+						}
+						fmt++;
+					}
+
+					// Ok, now we should be at closing '}'
+					if (*fmt != L::ccbrace)
+					{
+						throw format_error("Unclosed placeholder!");
+					}
+
+					// Print argument
+					out.width(width);
+					out.precision(precision > 0 ? precision : 6);
+					out.fill(padding);
+
+					av.map(indexToUse, [&](auto v) -> int { out << v; return 0;  });
+
+					argumentNumber++;
+					fmt++;
+				}
+				else if (!*fmt)
+				{
+					break; // \0 reached
+				}
+				else
+				{
+					out.put(*fmt++);
+				}
+			}
+		}
 	}
 
 	template <typename S, typename C = S::char_type>
@@ -104,11 +317,11 @@ namespace sb_com
 	{
 		if (fmt)
 		{
-			format(out, fmt, new detail::Arguments<int>(0), 0);
+			detail::format(out, fmt, detail::Arguments<int>{ 0 }, 0);
 		}
 	}
 
-	template <typename S, typename C = S::char_type, typename L = detail::Literals<C>, typename... Args>
+	template <typename S, typename C = S::char_type, typename... Args>
 	void format(S& out, const C* fmt, Args...args)
 	{
 		if (!fmt)
@@ -116,222 +329,7 @@ namespace sb_com
 			return;
 		}
 
-		const detail::Arguments<Args...> av(args...);
-
-		format(out, fmt, av, sizeof...(Args));
+		detail::format(out, fmt, detail::Arguments<Args...>{args...}, sizeof...(Args));
 	}
 
-	template <typename S, typename... A, typename C = S::char_type, typename L = detail::Literals<C>>
-	void format(S & out, const C * fmt, const detail::Arguments<A...> & av, size_t length)
-	{
-		if (!fmt)
-		{
-			return;
-		}
-
-		int argumentNumber = 0, indexToUse = 0;
-		bool quoted = false;
-		while (*fmt)
-		{
-			int flags = detail::None, width = 0, precision = 0;
-			C padding = L::space;
-
-			// We need to search passed format string for placeholders of the form 
-			// {[index[:[flags][width][.precision][specifier]]]}
-			// any characters inside single quotes '{abc}' are treated as text (not a placeholder). 
-			// Any two consecutive single quotes is an escaped single quote.
-			if (*fmt == L::squote && *++fmt != L::squote)
-			{
-				quoted = !quoted;
-			}
-
-			if (quoted)
-			{
-				out.put(*fmt++);
-				continue;
-			}
-
-			if (*fmt == L::ocbrace)
-			{
-				fmt++;
-
-				// Reset stream flags
-				out.flags(std::ios_base::dec | std::ios_base::internal | std::ios_base::fixed);
-
-				// Read index
-				int index = 0, digits = 0;
-				while (*fmt)
-				{
-					const C ch = *fmt;
-					if (ch < L::zero || ch > L::nine)
-					{
-						break;
-					}
-					index = 10 * index + static_cast<int>(ch - L::zero);
-					digits++;
-					fmt++;
-				}
-				if (digits == 0)
-				{
-					indexToUse = argumentNumber;
-				}
-				else
-				{
-					indexToUse = index;
-				}
-
-				if (*fmt == L::colon)
-				{
-					fmt++;
-
-					// Read flags
-					while (*fmt)
-					{
-						const C ch = *fmt;
-						if (ch == L::minus)
-						{
-							out.setf(std::ios_base::left, std::ios_base::adjustfield);
-						}
-						else if (ch == L::plus)
-						{
-							out.setf(std::ios_base::showpos);
-						}
-						else if (ch == L::space)
-						{
-							//flags |= Space; // not supported?
-						}
-						else if (ch == L::hash)
-						{
-							flags |= detail::Hash;
-						}
-						else if (ch == L::zero)
-						{
-							padding = L::zero;
-						}
-						else
-						{
-							break; // no more flags
-						}
-						fmt++;
-					}
-
-					// Read width
-					if (*fmt == L::star)
-					{
-						// todo ?????? width = av.map(avIdx++, detail::toInteger);
-						fmt++;
-					}
-					else
-					{
-						if (width == 0 && *fmt == L::zero)
-						{
-							throw format_error("Wrong width!");
-						}
-						while (*fmt)
-						{
-							const C ch = *fmt;
-							if (ch < L::zero || ch > L::nine)
-							{
-								break;
-							}
-							width = 10 * width + static_cast<int>(ch - L::zero);
-							fmt++;
-						}
-					}
-
-					// Read precision
-					if (*fmt == L::dot)
-					{
-						fmt++;
-						if (*fmt == L::star)
-						{
-							// todo precision = av.map(avIdx++, detail::toInteger);
-							fmt++;
-						}
-						else
-						{
-							while (*fmt)
-							{
-								const C ch = *fmt;
-								if (precision == 0 && ch == L::zero)
-								{
-									throw format_error("Wrong precision!");
-								}
-								if (ch < L::zero || ch > L::nine)
-								{
-									break;
-								}
-								precision = 10 * precision + static_cast<int>(ch - L::zero);
-								fmt++;
-							}
-						}
-					}
-
-					// Format argument(s) accordingly and write to output
-					switch (*fmt)
-					{
-					case L::A:
-						out.setf(std::ios_base::uppercase);
-					case L::a:
-						out.setf(std::ios_base::fixed | std::ios_base::scientific, std::ios_base::floatfield);
-						break;
-
-					case L::o:
-						out.setf(std::ios_base::oct, std::ios_base::basefield);
-						break;
-
-					case L::X:
-						out.setf(std::ios_base::uppercase);
-					case L::x:
-						out.setf(std::ios_base::hex, std::ios_base::basefield);
-						if (flags & detail::Hash)
-						{
-							out << "0x";
-						}
-						break;
-
-					case L::F:
-						out.setf(std::ios_base::uppercase);
-					case L::f:
-						out.setf(std::ios_base::fixed, std::ios_base::floatfield);
-						break;
-
-					case L::E:
-						out.setf(std::ios_base::uppercase);
-					case L::e:
-						out.setf(std::ios_base::scientific, std::ios_base::floatfield);
-						break;
-
-					default:
-						throw format_error("Unknown specifier: " + std::to_string(*fmt));
-					}
-					fmt++;
-				}
-
-				// Ok, now we should be at closing '}'
-				if (*fmt != L::ccbrace)
-				{
-					throw format_error("Unclosed placeholder!");
-				}
-
-				// Print argument
-				out.width(width);
-				out.precision(precision > 0 ? precision : 6);
-				out.fill(padding);
-
-				av.map(indexToUse, [&](auto v) -> int { out << v; return 0;  });
-
-				argumentNumber++;
-				fmt++;
-			}
-			else if (!*fmt)
-			{
-				break; // \0 reached
-			}
-			else
-			{
-				out.put(*fmt++);
-			}
-		}
-	}
 }

@@ -4,7 +4,7 @@
 #include <string>
 #include <type_traits>
 
-namespace sb_com
+namespace sb_com3
 {
 	class format_error : public std::runtime_error
 	{
@@ -167,9 +167,7 @@ namespace sb_com
 			return;
 		}
 
-		auto av = Arguments<Args...>(args...);
-
-		format(out, fmt, av);
+		_format(out, fmt, Arguments<Args...>(args...));
 	}
 
 	enum Flags : int
@@ -178,7 +176,7 @@ namespace sb_com
 	};
 
 	template <typename S, typename... Args, typename C = S::char_type, typename L = Literals<C>>
-	void format(S & out, const C * fmt, Arguments<Args...> & av)
+	void _format(S & out, const C * fmt, Arguments<Args...> & av)
 	{
 		if (!fmt)
 		{

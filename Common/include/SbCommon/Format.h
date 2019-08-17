@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace sb_com
+namespace sb_com1
 {
 	class format_error : public std::runtime_error
 	{
