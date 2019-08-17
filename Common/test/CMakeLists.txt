@@ -6,7 +6,6 @@ add_executable(SbCommonTests
 	src/FormatBufferTest.cpp
 	src/StringConversionTest.cpp
 	src/FormatTest.cpp
-	src/Format2Test.cpp
 	src/Format3Test.cpp
 )
 
