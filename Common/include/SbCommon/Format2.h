@@ -7,209 +7,122 @@
 
 namespace sb_com
 {
-	class format_error2 : public std::runtime_error
+	class format_error : public std::runtime_error
 	{
 	public:
-		format_error2(const char* msg) : std::runtime_error(msg)
+		format_error(const char* msg) : std::runtime_error(msg)
 		{
 		}
-		format_error2(const std::string& msg) : std::runtime_error(msg)
+		format_error(const std::string& msg) : std::runtime_error(msg)
 		{
 		}
 	};
 
-	template <typename C>
-	struct Literals
+	namespace detail
 	{
-		const static C percent = static_cast<C>('%');
-		const static C ocbrace = static_cast<C>('{');
-		const static C ccbrace = static_cast<C>('}');
-		const static C squote = static_cast<C>('\'');
-		const static C zero = static_cast<C>('0');
-		const static C nine = static_cast<C>('9');
-	};
-
-	template <typename S>
-	struct Modifiers
-	{
-		template <typename Integral>
-		static std::function<void(S&)> oct(Integral value)
+		template <typename C>
+		struct Literals
 		{
-			return [=](S& out) { out << std::oct << value; };
-		}
+			const static C ocbrace = static_cast<C>('{');
+			const static C ccbrace = static_cast<C>('}');
+			const static C squote = static_cast<C>('\'');
+			const static C colon = static_cast<C>(':');
+			const static C minus = static_cast<C>('-');
+			const static C plus = static_cast<C>('+');
+			const static C space = static_cast<C>(' ');
+			const static C hash = static_cast<C>('#');
+			const static C zero = static_cast<C>('0');
+			const static C nine = static_cast<C>('9');
+			const static C dot = static_cast<C>('.');
+			const static C a = static_cast<C>('a');
+			const static C A = static_cast<C>('A');
+			const static C e = static_cast<C>('e');
+			const static C E = static_cast<C>('E');
+			const static C f = static_cast<C>('f');
+			const static C F = static_cast<C>('F');
+			const static C o = static_cast<C>('o');
+			const static C x = static_cast<C>('x');
+			const static C X = static_cast<C>('X');
+			const static C star = static_cast<C>('*');
+		};
 
-		static std::function<void(S&)> w(int width, int precision, std::function<void(S&)> delegate)
+		template <typename... Tail>
+		struct Arguments
 		{
-			return [=](S& out) {
-				out.width(width);
-				out.precision(precision > 0 ? precision : 6);
-				delegate(out);
-			};
-		}
+			template <typename Op>
+			auto map(int index, Op op) const
+			{
+				throw std::out_of_range("No args!");
+				return op(0);
+			}
+		};
 
-		template <typename V>
-		static std::function<void(S&)> w(int width, int precision, V value)
+		template <typename T, typename... Tail>
+		struct Arguments<T, Tail...> : private Arguments<Tail...>
 		{
-			return w(width, precision, std::function<void(S&)>([=](S& out) { out << value; }));
-		}
+			using Base = Arguments<Tail...>;
 
-		template <typename V>
-		static std::function<void(S&)> hex(V value, bool upperCase, bool prefix)
-		{
-			return [=](S& out) {
-				out.setf(std::ios_base::hex, std::ios_base::basefield);
-				if (upperCase)
+			Arguments(T v, Tail...tail) : value{ v }, Base{ tail... }
+			{
+			}
+
+			template <typename Op>
+			auto map(int index, Op op) const
+			{
+				if (index == 0)
 				{
-					out.setf(std::ios_base::uppercase);
+					return op(value);
 				}
-				if (prefix)
-				{
-					out << "0x";
-				}
-				out << value;
-			};
+				return Base::map(index - 1, op);
+			}
+
+		private:
+			const T value;
+		};
+
+		enum Flags : int
+		{
+			None = 0, /*LeftJustify = 1, ForceSign = 2, Space = 4,*/ Hash = 8//, PadWithZeroes = 16
+		};
+
+		template <typename V, typename std::enable_if_t<!std::is_integral_v<V>, int> = 0>
+		int toInteger(V value)
+		{
+			throw format_error("Not integral type!");
 		}
 
-		template <typename V>
-		static std::function<void(S&)> fhex(V value, bool upperCase)
+		template <typename V, typename std::enable_if_t<std::is_integral_v<V>, int> = 0>
+		int toInteger(V value)
 		{
-			return [=](S& out) {
-				out.setf(std::ios_base::fixed | std::ios_base::scientific, std::ios_base::floatfield);
-				if (upperCase)
-				{
-					out.setf(std::ios_base::uppercase);
-				}
-				out << value;
-			};
+			return static_cast<int>(value);
 		}
 
-		template <typename V>
-		static std::function<void(S&)> fixed(V value, bool upperCase)
-		{
-			return [=](S& out) {
-				out.setf(std::ios_base::fixed, std::ios_base::floatfield);
-				if (upperCase)
-				{
-					out.setf(std::ios_base::uppercase);
-				}
-				out << value;
-			};
-		}
-
-		template <typename V>
-		static std::function<void(S&)> f(V value)
-		{
-			return fixed(value, false);
-		}
-
-		template <typename V>
-		static std::function<void(S&)> F(V value)
-		{
-			return fixed(value, true);
-		}
-
-		template <typename V>
-		static std::function<void(S&)> x(V value)
-		{
-			return hex(value, false, false);
-		}
-
-		template <typename V>
-		static std::function<void(S&)> zx(V value)
-		{
-			return hex(value, false, true);
-		}
-
-		template <typename V>
-		static std::function<void(S&)> X(V value)
-		{
-			return hex(value, true, false);
-		}
-
-		template <typename V>
-		static std::function<void(S&)> ZX(V value)
-		{
-			return hex(value, true, true);
-		}
-
-		template <typename V>
-		static std::function<void(S&)> a(V value)
-		{
-			return fhex(value, false);
-		}
-
-		template <typename V>
-		static std::function<void(S&)> A(V value)
-		{
-			return fhex(value, true);
-		}
-	};
-
-	template <typename S>
-	struct Arg
-	{
-		using Consumer = std::function<void(S&)>;
-
-		Arg(const Consumer& c) : consumer{ c }
-		{
-		}
-		Arg(Consumer&& c) : consumer{ std::move(c) }
-		{
-		}
-		Arg(Arg&& a) : consumer{ std::move(a.consumer) }
-		{
-			a.consumer = nullptr;
-		}
-		template <typename V>
-		Arg(V x) : consumer{ [=](S& out) { out << x; } }
-		{
-		}
-
-		void print(S& out) const
-		{
-			consumer(out);
-		}
-
-	private:
-		Consumer consumer;
-	};
-
-	template <typename S>
-	using Getter = std::function<const Arg<S>& (int)>;
+	}
 
 	template <typename S, typename C = S::char_type>
-	void format2(S & out, const C * fmt)
+	void format(S & out, const C * fmt)
 	{
 		if (fmt)
 		{
-			format3(out, fmt, static_cast<const Arg<S>*>(nullptr), 0);
+			format(out, fmt, new detail::Arguments<int>(0), 0);
 		}
 	}
 
-	template <typename S, typename C = S::char_type, typename L = Literals<C>, typename... Args>
-	void format2(S& out, const C* fmt, Args...args)
+	template <typename S, typename C = S::char_type, typename L = detail::Literals<C>, typename... Args>
+	void format(S& out, const C* fmt, Args...args)
 	{
 		if (!fmt)
 		{
 			return;
 		}
 
-		const Arg<S> av[] = { args... };
+		const detail::Arguments<Args...> av(args...);
 
-		format3(out, fmt, av, sizeof...(Args));
+		format(out, fmt, av, sizeof...(Args));
 	}
 
-	template <typename S>
-	inline const Arg<S>& get(const Arg<S>* av, size_t length, int index) {
-		if (index >= length)
-		{
-			throw format_error2("Index is out of range: " + std::to_string(index));
-		}
-		return av[index];
-	};
-
-	template <typename S, typename C = S::char_type, typename L = Literals<C>>
-	void format3(S & out, const C * fmt, const Arg<S> * av, size_t length)
+	template <typename S, typename... A, typename C = S::char_type, typename L = detail::Literals<C>>
+	void format(S & out, const C * fmt, const detail::Arguments<A...> & av, size_t length)
 	{
 		if (!fmt)
 		{
@@ -220,7 +133,11 @@ namespace sb_com
 		bool quoted = false;
 		while (*fmt)
 		{
-			// We need to search passed format string for placeholders of the form {[index]}
+			int flags = detail::None, width = 0, precision = 0;
+			C padding = L::space;
+
+			// We need to search passed format string for placeholders of the form 
+			// {[index[:[flags][width][.precision][specifier]]]}
 			// any characters inside single quotes '{abc}' are treated as text (not a placeholder). 
 			// Any two consecutive single quotes is an escaped single quote.
 			if (*fmt == L::squote && *++fmt != L::squote)
@@ -263,14 +180,146 @@ namespace sb_com
 					indexToUse = index;
 				}
 
+				if (*fmt == L::colon)
+				{
+					fmt++;
+
+					// Read flags
+					while (*fmt)
+					{
+						const C ch = *fmt;
+						if (ch == L::minus)
+						{
+							out.setf(std::ios_base::left, std::ios_base::adjustfield);
+						}
+						else if (ch == L::plus)
+						{
+							out.setf(std::ios_base::showpos);
+						}
+						else if (ch == L::space)
+						{
+							//flags |= Space; // not supported?
+						}
+						else if (ch == L::hash)
+						{
+							flags |= detail::Hash;
+						}
+						else if (ch == L::zero)
+						{
+							padding = L::zero;
+						}
+						else
+						{
+							break; // no more flags
+						}
+						fmt++;
+					}
+
+					// Read width
+					if (*fmt == L::star)
+					{
+						// todo ?????? width = av.map(avIdx++, detail::toInteger);
+						fmt++;
+					}
+					else
+					{
+						if (width == 0 && *fmt == L::zero)
+						{
+							throw format_error("Wrong width!");
+						}
+						while (*fmt)
+						{
+							const C ch = *fmt;
+							if (ch < L::zero || ch > L::nine)
+							{
+								break;
+							}
+							width = 10 * width + static_cast<int>(ch - L::zero);
+							fmt++;
+						}
+					}
+
+					// Read precision
+					if (*fmt == L::dot)
+					{
+						fmt++;
+						if (*fmt == L::star)
+						{
+							// todo precision = av.map(avIdx++, detail::toInteger);
+							fmt++;
+						}
+						else
+						{
+							while (*fmt)
+							{
+								const C ch = *fmt;
+								if (precision == 0 && ch == L::zero)
+								{
+									throw format_error("Wrong precision!");
+								}
+								if (ch < L::zero || ch > L::nine)
+								{
+									break;
+								}
+								precision = 10 * precision + static_cast<int>(ch - L::zero);
+								fmt++;
+							}
+						}
+					}
+
+					// Format argument(s) accordingly and write to output
+					switch (*fmt)
+					{
+					case L::A:
+						out.setf(std::ios_base::uppercase);
+					case L::a:
+						out.setf(std::ios_base::fixed | std::ios_base::scientific, std::ios_base::floatfield);
+						break;
+
+					case L::o:
+						out.setf(std::ios_base::oct, std::ios_base::basefield);
+						break;
+
+					case L::X:
+						out.setf(std::ios_base::uppercase);
+					case L::x:
+						out.setf(std::ios_base::hex, std::ios_base::basefield);
+						if (flags & detail::Hash)
+						{
+							out << "0x";
+						}
+						break;
+
+					case L::F:
+						out.setf(std::ios_base::uppercase);
+					case L::f:
+						out.setf(std::ios_base::fixed, std::ios_base::floatfield);
+						break;
+
+					case L::E:
+						out.setf(std::ios_base::uppercase);
+					case L::e:
+						out.setf(std::ios_base::scientific, std::ios_base::floatfield);
+						break;
+
+					default:
+						throw format_error("Unknown specifier: " + std::to_string(*fmt));
+					}
+					fmt++;
+				}
+
 				// Ok, now we should be at closing '}'
 				if (*fmt != L::ccbrace)
 				{
-					throw format_error2("Unclosed placeholder!");
+					throw format_error("Unclosed placeholder!");
 				}
 
 				// Print argument
-				get(av, length, indexToUse).print(out);
+				out.width(width);
+				out.precision(precision > 0 ? precision : 6);
+				out.fill(padding);
+
+				av.map(indexToUse, [&](auto v) -> int { out << v; return 0;  });
 
 				argumentNumber++;
 				fmt++;
