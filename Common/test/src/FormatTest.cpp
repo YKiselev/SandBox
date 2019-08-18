@@ -187,7 +187,7 @@ TEST(Format, String)
 	ASSERT_EQ("abc"s, s.str());
 }
 //DISABLED_
-TEST(Format, Perormance)
+TEST(Format, DISABLED_Perormance)
 {
 	double avg1 = 0, avg2 = 0;
 	for (int t = 0; t < Tries; t++)
@@ -230,4 +230,30 @@ TEST(Format, Perormance)
 		}
 	}
 	std::cout << "Avg Elapsed time (format2): " << (avg1 / Tries) << ", (sprintf) " << (avg2 / Tries) << std::endl;
+}
+
+template <typename X>
+struct IsPointer
+{
+	enum { result = false };
+	using Pointee = void;
+};
+
+template <typename X>
+struct IsPointer<X*>
+{
+	enum { result = true };
+	using Pointee = X;
+};
+
+TEST(A,B)
+{
+	bool v = IsPointer<std::vector<int>::iterator>::result;
+	std::cout << (v ? "fast" : "smart") << "\n";
+
+	bool v2 = IsPointer<int*>::result;
+	std::cout << (v2 ? "fast" : "smart") << "\n";
+
+	bool v3 = IsPointer<int&>::result;
+	std::cout << (v3 ? "fast" : "smart") << "\n";
 }

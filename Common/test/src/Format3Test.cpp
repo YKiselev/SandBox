@@ -160,7 +160,7 @@ TEST(Format3, String)
 	ASSERT_EQ("abc"s, s.str());
 }
 //DISABLED_
-TEST(Format3, Perormance)
+TEST(Format3, DISABLED_Perormance)
 {
 	double avg1 = 0, avg2 = 0;
 	for (int t = 0; t < Tries; t++)

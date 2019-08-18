@@ -13,7 +13,7 @@ namespace sb_com
 		FormatBuffer()
 		{
 		}
-		FormatBuffer(std::size_t size) : buf(size)
+		explicit FormatBuffer(std::size_t size) : buf(size)
 		{
 		}
 

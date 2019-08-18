@@ -8,6 +8,7 @@ include(GoogleTest)
 
 add_executable(SbSpiTests 
 	src/PersistedConfigurationTest.cpp
+	src/LoggerTest.cpp
 )
 
 target_link_libraries(SbSpiTests PRIVATE

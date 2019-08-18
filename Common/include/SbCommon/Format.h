@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdexcept>
-#include <functional>
+#include <type_traits>
 #include <string>
 
 
@@ -53,7 +53,7 @@ namespace sb_com
 			auto map(int index, Op op) const
 			{
 				throw std::out_of_range("No args!");
-				return op(0);
+				return op(0); // needed by compiler to deduce result type
 			}
 		};
 

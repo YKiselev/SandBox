@@ -6,33 +6,84 @@
 #include <iostream>
 #include <exception>
 
+struct Base
+{
+};
+
+template <typename...Tail>
+struct X
+{
+
+};
+
+template <typename Head, typename...Tail>
+struct X<Head, Tail...>
+{
+	Head head;
+	X<Tail...> tail;
+};
+
+
+template <typename...Tail>
+struct Y
+{
+
+};
+
+template <typename Head, typename...Tail>
+struct Y<Head, Tail...> : private Y<Tail...>
+{
+	using Base = Y<Tail...>;
+
+	Y(Head h, Tail...tail) : _head{ h }, Base{ tail... }
+	{
+	}
+
+	Head _head;
+};
+
+template <typename...Args>
+void format(const char* fmt, Args...args)
+{
+
+}
+
 int main()
 {
-	std::wstring name = L"SbGame-d.dll";
+	X<int, double, char*, long long> x{ 1, 2.5, "aaaaa", 0xffff };
 
-	sb_pal::DynamicLibrary lib{ name };
+	Y<int, double, char*, long long> y{ 1, 2.5, "aaaaa", 0xffff };
 
-	sb_spi::CreateGameSignature* fn1 = lib.address<sb_spi::CreateGameSignature>("createGame");
+	std::cout << "Size of x is " << sizeof(x) << "\n";
+	std::cout << "Size of y is " << sizeof(y) << "\n";
 
-	sb_spi::Game*(*fn)() = lib.address<sb_spi::Game*()>("createGame");
-	if (fn)
-	{
-		std::cout << "Ok" << std::endl;
+	format("????", 1, 3.5, "test", 'A');
+	/*
+		std::wstring name = L"SbGame-d.dll";
 
-		sb_spi::Game* game = fn();
+		sb_pal::DynamicLibrary lib{ name };
 
-		std::cout << "Got new game: " << game->getName() << std::endl;
+		sb_spi::CreateGameSignature* fn1 = lib.address<sb_spi::CreateGameSignature>("createGame");
 
-		game->release();
-		game = nullptr;
-	}
-	else
-	{
-		throw std::runtime_error("Unable to get function address!");
-	}
+		sb_spi::Game*(*fn)() = lib.address<sb_spi::Game*()>("createGame");
+		if (fn)
+		{
+			std::cout << "Ok" << std::endl;
 
+			sb_spi::Game* game = fn();
+
+			std::cout << "Got new game: " << game->getName() << std::endl;
+
+			game->release();
+			game = nullptr;
+		}
+		else
+		{
+			throw std::runtime_error("Unable to get function address!");
+		}
+		*/
 	return 0;
 	//app::App app;
-	
+
 	//return app.run();
 }

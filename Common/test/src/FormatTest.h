@@ -1,3 +1,3 @@
 #pragma once
 
-constexpr int Iterations = 150000, Tries = 3;
+constexpr int Iterations = 15000, Tries = 3;
