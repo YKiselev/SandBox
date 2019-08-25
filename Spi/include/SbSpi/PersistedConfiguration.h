@@ -1,252 +1,322 @@
 #pragma once
 
-#include <string>
-#include <cstdio>
-#include <array>
-#include <charconv>
-#include <exception>
-#include <stdexcept>
-#include <cstdlib>
 #include <atomic>
-#include <type_traits>
+#include <mutex>
+#include <cstring>
 #include <shared_mutex>
+#include "SharedObject.h"
 
 namespace sb_spi
 {
-	namespace traits
-	{
-		template <typename T>
-		constexpr bool isAtomic()
-		{
-			return std::is_trivially_copyable_v<T> && std::is_copy_constructible_v<T> && std::is_move_constructible_v<T>
-				&& std::is_copy_assignable_v<T> && std::is_move_assignable_v<T>;
-		}
-	}
-
-	template <typename V>
-	struct AtomicValue
-	{
-		using value_type = V;
-
-		AtomicValue()
-		{
-		}
-		AtomicValue(V src)
-		{
-			set(src);
-		}
-		AtomicValue(const AtomicValue<V>& src) = delete;
-		AtomicValue(AtomicValue<V>&& src) = delete;
-		AtomicValue<V>& operator = (const AtomicValue<V>& src) = delete;
-		AtomicValue<V>& operator = (AtomicValue<V>&& src) = delete;
-
-		V get() const
-		{
-			return value.load(std::memory_order::memory_order_acquire);
-		}
-		void set(const V src)
-		{
-			value.store(src, std::memory_order::memory_order_release);
-		}
-
-	private:
-		std::atomic<V> value;
-	};
-
-	template <typename V>
-	struct LockedValue
-	{
-		using value_type = std::string;
-
-		LockedValue()
-		{
-		}
-		LockedValue(const V& src)
-		{
-			set(src);
-		}
-		LockedValue(const LockedValue<V>& src) = delete;
-		LockedValue(LockedValue<V>&& src) = delete;
-		LockedValue<V>& operator = (const LockedValue<V>& src) = delete;
-		LockedValue<V>& operator = (LockedValue<V>&& src) = delete;
-
-		V get() const
-		{
-			std::shared_lock lock{ mutex };
-			return value;
-		}
-		void set(const V& src)
-		{
-			std::unique_lock lock{ mutex };
-			value = src;
-		}
-
-	private:
-		mutable std::shared_mutex mutex;
-		V value;
-	};
-
-	template <typename V>
-	struct Converter
-	{
-		static std::string toString(V value)
-		{
-			return std::to_string(value);
-		}
-
-		static V fromString(const std::string& src)
-		{
-			if (src.empty())
-			{
-				return {};
-			}
-			else
-			{
-				return fromNonEmptyString<V>(src);
-				/*				V result;
-								auto ec = std::from_chars(src.data(), src.data() + src.size(), result).ec;
-								if (ec == std::errc())
-								{
-									return result;
-								}
-								else
-								{
-									return {};
-								}*/
-			}
-		}
-
-	private:
-		template <typename V2 = V, std::enable_if_t<std::is_integral_v<V2>, int> = 0>
-		static V2 fromNonEmptyString(const std::string & src)
-		{
-			return static_cast<V2>(std::stoll(src));
-		}
-
-		template <typename V2 = V, std::enable_if_t<std::is_floating_point_v<V2>, int> = 0>
-		static V2 fromNonEmptyString(const std::string & src)
-		{
-			return static_cast<V2>(std::stold(src));
-		}
-	};
-
-	template <>
-	struct Converter<bool>
-	{
-		static std::string toString(bool value)
-		{
-			return value ? "true" : "false";
-		}
-
-		static bool fromString(const std::string& src)
-		{
-			return src == "true";
-		}
-	};
-
-	template <>
-	struct Converter<std::string>
-	{
-		static std::string& toString(std::string&& value)
-		{
-			return value;
-		}
-
-		static std::string fromString(const std::string& src)
-		{
-			return std::move(src);
-		}
-	};
-
-	template <typename V, typename C, typename N>
-	struct Value
-	{
-		using value_type = V;
-		using wrapper_type = N;
-		using converter_type = C;
-
-		Value()
-		{
-		}
-
-		Value(V src)
-		{
-			value.set(src);
-		}
-		Value(const Value<V, C, N>& src) = delete;
-		Value(const Value<V, C, N>&& src) = delete;
-		Value<V, C, N> operator = (const Value<V, C, N>& src) = delete;
-		Value<V, C, N> operator = (Value<V, C, N>&& src) = delete;
-
-		V get() const
-		{
-			return value.get();
-		}
-
-		void set(V src)
-		{
-			value.set(src);
-		}
-
-		std::string toString() const
-		{
-			return C::toString(value.get());
-		}
-
-		void fromString(const std::string& src)
-		{
-			value.set(C::fromString(src));
-		}
-
-	private:
-		N value;
-	};
-
-	template <typename T>
-	using BaseValue = Value<T, Converter<T>, typename std::conditional<traits::isAtomic<T>(), AtomicValue<T>, LockedValue<T>>::type>;
-
-	using IntValue = BaseValue<int>;
-	using FloatValue = BaseValue<float>;
-	using BoolValue = BaseValue<bool>;
-	using StringValue = BaseValue<std::string>;
-
-	class Configuration
+	//
+	// Configuration value - interface implemented by all final types of values.
+	//
+	class ConfigValue
 	{
 	public:
-		virtual ~Configuration() {};
+		virtual ~ConfigValue() = default;
 
-		virtual void add(const std::string& name, IntValue& value) = 0;
-		virtual void addReadOnly(const std::string& name, const IntValue& value) = 0;
-
-		virtual void add(const std::string& name, FloatValue& value) = 0;
-		virtual void addReadOnly(const std::string& name, const FloatValue& value) = 0;
-
-		virtual std::string getString(const std::string& name) const = 0;
-		virtual void setString(const std::string& name, const std::string& value) = 0;
-
-		virtual int getInt(const std::string& name) const = 0;
-		virtual void setInt(const std::string& name, int value) = 0;
-
-		virtual float getFloat(const std::string& name) const = 0;
-		virtual void setFloat(const std::string& name, float value) = 0;
-
-		virtual bool getBool(const std::string& name) const = 0;
-		virtual void setBool(const std::string& name, bool value) = 0;
-
-	protected:
-		virtual IntValue const* findInt(const std::string& name) const = 0;
-		virtual FloatValue const* findFloat(const std::string& name) const = 0;
-		virtual BoolValue const* findBool(const std::string& name) const = 0;
-		virtual StringValue const* findString(const std::string& name) const = 0;
+		virtual int getString(char* buf, size_t capacity) const = 0;
+		virtual void setString(const char* value) = 0;
+		virtual int getInt() const = 0;
+		virtual void setInt(int value) = 0;
+		virtual unsigned long long getUllong() const = 0;
+		virtual void setUllong(unsigned long long value) = 0;
+		virtual float getFloat() const = 0;
+		virtual void setFloat(float value) = 0;
+		virtual double getDouble() const = 0;
+		virtual void setDouble(double value) = 0;
+		virtual bool getBool() const = 0;
+		virtual void setBool(bool value) = 0;
 	};
 
+	//
+	// Int value
+	//
+	class IntValue final : public ConfigValue
+	{
+	public:
+		IntValue();
+		explicit IntValue(int value);
+		IntValue(const IntValue& src) = delete;
+		IntValue(IntValue&& src) = delete;
+		virtual ~IntValue();
+
+		IntValue& operator = (const IntValue& src) = delete;
+		IntValue& operator = (IntValue&& src) = delete;
+
+		int getString(char* buf, size_t capacity) const override;
+		void setString(const char* value) override;
+		int getInt() const override;
+		void setInt(int value) override;
+		unsigned long long getUllong() const override;
+		void setUllong(unsigned long long value) override;
+		float getFloat() const override;
+		void setFloat(float value) override;
+		double getDouble() const override;
+		void setDouble(double value) override;
+		bool getBool() const override;
+		void setBool(bool value) override;
+
+		void set(int value)
+		{
+			_atomic.store(value, std::memory_order_release);
+		}
+
+		int get() const
+		{
+			return _atomic.load(std::memory_order_acquire);
+		}
+
+	private:
+		std::atomic_int _atomic;
+	};
+
+	//
+	// Unsigned long long int value
+	//
+	class UllongValue final : public ConfigValue
+	{
+	public:
+		UllongValue();
+		explicit UllongValue(unsigned long long value);
+		UllongValue(const UllongValue& src) = delete;
+		UllongValue(UllongValue&& src) = delete;
+		virtual ~UllongValue();
+
+		UllongValue& operator = (const UllongValue& src) = delete;
+		UllongValue& operator = (UllongValue&& src) = delete;
+
+		int getString(char* buf, size_t capacity) const override;
+		void setString(const char* value) override;
+		int getInt() const override;
+		void setInt(int value) override;
+		unsigned long long getUllong() const override;
+		void setUllong(unsigned long long value) override;
+		float getFloat() const override;
+		void setFloat(float value) override;
+		double getDouble() const override;
+		void setDouble(double value) override;
+		bool getBool() const override;
+		void setBool(bool value) override;
+
+		void set(unsigned long long value)
+		{
+			_atomic.store(value, std::memory_order_release);
+		}
+
+		unsigned long long get() const
+		{
+			return _atomic.load(std::memory_order_acquire);
+		}
+
+	private:
+		std::atomic_ullong _atomic;
+	};
+
+	//
+	// Double value
+	//
+	class DoubleValue final : public ConfigValue
+	{
+	public:
+		DoubleValue();
+		explicit DoubleValue(double value);
+		DoubleValue(const DoubleValue& src) = delete;
+		DoubleValue(DoubleValue&& src) = delete;
+		virtual ~DoubleValue();
+
+		DoubleValue& operator = (const DoubleValue& src) = delete;
+		DoubleValue& operator = (DoubleValue&& src) = delete;
+
+		int getString(char* buf, size_t capacity) const override;
+		void setString(const char* value) override;
+		int getInt() const override;
+		void setInt(int value) override;
+		unsigned long long getUllong() const override;
+		void setUllong(unsigned long long value) override;
+		float getFloat() const override;
+		void setFloat(float value) override;
+		double getDouble() const override;
+		void setDouble(double value) override;
+		bool getBool() const override;
+		void setBool(bool value) override;
+
+		void set(double value)
+		{
+			_atomic.store(value, std::memory_order_release);
+		}
+
+		double get() const
+		{
+			return _atomic.load(std::memory_order_acquire);
+		}
+
+	private:
+		std::atomic<double> _atomic;
+	};
+
+	//
+	// Float value
+	//
+	class FloatValue final : public ConfigValue
+	{
+	public:
+		FloatValue();
+		explicit FloatValue(float value);
+		FloatValue(const FloatValue& src) = delete;
+		FloatValue(FloatValue&& src) = delete;
+		virtual ~FloatValue();
+
+		FloatValue& operator = (const FloatValue& src) = delete;
+		FloatValue& operator = (FloatValue&& src) = delete;
+
+		int getString(char* buf, size_t capacity) const override;
+		void setString(const char* value) override;
+		int getInt() const override;
+		void setInt(int value) override;
+		unsigned long long getUllong() const override;
+		void setUllong(unsigned long long value) override;
+		float getFloat() const override;
+		void setFloat(float value) override;
+		double getDouble() const override;
+		void setDouble(double value) override;
+		bool getBool() const override;
+		void setBool(bool value) override;
+
+		void set(float value)
+		{
+			_atomic.store(value, std::memory_order_release);
+		}
+
+		float get() const
+		{
+			return _atomic.load(std::memory_order_acquire);
+		}
+
+	private:
+		std::atomic<float> _atomic;
+	};
+
+	//
+	// Bool value
+	//
+	class BoolValue final : public ConfigValue
+	{
+	public:
+		BoolValue();
+		explicit BoolValue(bool value);
+		BoolValue(const BoolValue& src) = delete;
+		BoolValue(BoolValue&& src) = delete;
+		virtual ~BoolValue();
+
+		BoolValue& operator = (const BoolValue& src) = delete;
+		BoolValue& operator = (BoolValue&& src) = delete;
+
+		int getString(char* buf, size_t capacity) const override;
+		void setString(const char* value) override;
+		int getInt() const override;
+		void setInt(int value) override;
+		unsigned long long getUllong() const override;
+		void setUllong(unsigned long long value) override;
+		float getFloat() const override;
+		void setFloat(float value) override;
+		double getDouble() const override;
+		void setDouble(double value) override;
+		bool getBool() const override;
+		void setBool(bool value) override;
+
+		void set(bool value)
+		{
+			_atomic.store(value, std::memory_order_release);
+		}
+
+		bool get() const
+		{
+			return _atomic.load(std::memory_order_acquire);
+		}
+
+	private:
+		std::atomic_bool _atomic;
+	};
+
+	//
+	// Fixed capacity string value
+	//
+	class StringValue final : public ConfigValue
+	{
+	public:
+		StringValue(size_t capacity);
+		StringValue(size_t capacity, const char* value);
+		StringValue(const StringValue& src) = delete;
+		StringValue(StringValue&& src) = delete;
+		virtual ~StringValue();
+
+		StringValue& operator = (const StringValue& src) = delete;
+		StringValue& operator = (StringValue&& src) = delete;
+
+		int getString(char* buf, size_t capacity) const override;
+		void setString(const char* value) override;
+		int getInt() const override;
+		void setInt(int value) override;
+		unsigned long long getUllong() const override;
+		void setUllong(unsigned long long value) override;
+		float getFloat() const override;
+		void setFloat(float value) override;
+		double getDouble() const override;
+		void setDouble(double value) override;
+		bool getBool() const override;
+		void setBool(bool value) override;
+
+		void set(const char* value);
+		int get(char* buf, size_t capacity) const;
+
+		size_t capacity() const
+		{
+			return _capacity;
+		}
+
+	private:
+		mutable std::shared_mutex _mutex;
+		const size_t _capacity;
+		char* _value;
+	};
+
+	//
+	// Configuration interface
+	//
+	class Configuration : public SharedObject
+	{
+	public:
+		virtual bool add(const char* name, ConfigValue& value) = 0;
+		virtual bool remove(const char* name) = 0;
+
+		virtual int getString(const char* name, char* dest, size_t capacity) const = 0;
+		virtual void setString(const char* name, const char* value) = 0;
+
+		virtual int getInt(const char* name) const = 0;
+		virtual void setInt(const char* name, int value) = 0;
+
+		virtual unsigned long long getUllong(const char* name) const = 0;
+		virtual void setUllong(const char* name, unsigned long long value) = 0;
+
+		virtual float getFloat(const char* name) const = 0;
+		virtual void setFloat(const char* name, float value) = 0;
+
+		virtual double getDouble(const char* name) const = 0;
+		virtual void setDouble(const char* name, double value) = 0;
+
+		virtual bool getBool(const char* name) const = 0;
+		virtual void setBool(const char* name, bool value) = 0;
+	};
+
+	//
+	// Persisted configuration interface
+	//
 	class PersistedConfiguration : public Configuration
 	{
 	public:
-		virtual ~PersistedConfiguration() {};
-
-		virtual void persist(const std::string& name) const = 0;
-		virtual void load(const std::string& name) = 0;
-		virtual void loadAll(const std::string& name) = 0;
+		virtual void persist(const char* name) const = 0;
+		virtual void load(const char* name) = 0;
 	};
 }

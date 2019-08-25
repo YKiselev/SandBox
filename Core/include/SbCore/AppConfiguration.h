@@ -1,9 +1,7 @@
 #pragma once
 
-#include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
-#include <variant>
-#include <stdexcept>
 #include "SbSpi/PersistedConfiguration.h"
 
 namespace app
@@ -11,45 +9,36 @@ namespace app
 	class AppConfiguration : public sb_spi::PersistedConfiguration
 	{
 	public:
-		using value_type = std::variant<sb_spi::IntValue, sb_spi::FloatValue, sb_spi::BoolValue, sb_spi::StringValue>;
+		AppConfiguration();
+		virtual ~AppConfiguration();
+		void release() override;
 
-		AppConfiguration()
-		{
-		}
+		void persist(const char* name) const override;
+		void load(const char* name) override;
 
-		virtual void persist(const std::string& name) const override;
-		virtual void load(const std::string& name) override;
-		virtual void loadAll(const std::string& name) override;
+		bool add(const char* name, sb_spi::ConfigValue& value) override;
+		bool remove(const char* name) override;
 
-		virtual void add(const std::string& name, sb_spi::IntValue& value) override;
-		virtual void addReadOnly(const std::string& name, const sb_spi::IntValue& value) override;
-		virtual void add(const std::string& name, sb_spi::FloatValue& value) override;
-		virtual void addReadOnly(const std::string& name, const sb_spi::FloatValue& value) override;
-		virtual std::string getString(const std::string& name) const override;
-		virtual void setString(const std::string& name, const std::string& value) override;
-		virtual int getInt(const std::string& name) const override;
-		virtual void setInt(const std::string& name, int value) override;
-		virtual float getFloat(const std::string& name) const override;
-		virtual void setFloat(const std::string& name, float value) override;
-		virtual bool getBool(const std::string& name) const override;
-		virtual void setBool(const std::string& name, bool value) override;
-		virtual sb_spi::IntValue const* findInt(const std::string& name) const override;
-		virtual sb_spi::FloatValue const* findFloat(const std::string& name) const override;
-		virtual sb_spi::BoolValue const* findBool(const std::string& name) const override;
-		virtual sb_spi::StringValue const* findString(const std::string& name) const override;
+		int getString(const char* name, char* dest, size_t capacity) const override;
+		void setString(const char* name, const char* value) override;
+		int getInt(const char* name) const override;
+		void setInt(const char* name, int value) override;
+		unsigned long long getUllong(const char* name) const override;
+		void setUllong(const char* name, unsigned long long value) override;
+		float getFloat(const char* name) const override;
+		void setFloat(const char* name, float value) override;
+		double getDouble(const char* name) const override;
+		void setDouble(const char* name, double value) override;
+		bool getBool(const char* name) const override;
+		void setBool(const char* name, bool value) override;
 
 	private:
-		mutable std::shared_mutex mutex;
-		std::unordered_map < std::string, value_type> map;
+		mutable std::shared_mutex _mutex;
+		std::unordered_map<std::string, sb_spi::ConfigValue&> _map;
 
-		template <typename V>
-		const V& ref(std::string& name, V const* value) const
-		{
-			if (value)
-			{
-				return *value;
-			}
-			throw std::runtime_error("Not found: " + name);
-		}
+		template <typename R, typename...Args>
+		R getValue(const char* name, R(sb_spi::ConfigValue::* mf)(Args...)const, Args...args) const;
+		template <typename...Args>
+		void setValue(const char* name, void(sb_spi::ConfigValue::* mf)(Args...), Args...args);
 	};
 }

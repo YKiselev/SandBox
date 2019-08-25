@@ -9,6 +9,7 @@ target_sources(SbCore
 		src/App.cpp
 		src/AppWindow.cpp
 		src/AppConfiguration.cpp
+		src/AppLoggerFactory.cpp
 )
 
 target_include_directories(SbCore PUBLIC

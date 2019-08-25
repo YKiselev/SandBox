@@ -9,6 +9,7 @@ include(GoogleTest)
 add_executable(SbSpiTests 
 	src/PersistedConfigurationTest.cpp
 	src/LoggerTest.cpp
+	src/SharedObjectTest.cpp
 )
 
 target_link_libraries(SbSpiTests PRIVATE

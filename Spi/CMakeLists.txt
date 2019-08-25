@@ -2,7 +2,7 @@
 
 add_library (SbSpi 
 	src/DelegatingWindowEvents.cpp
-	src/DefaultLogger.cpp
+	src/PersistedConfiguration.cpp
 )
 
 target_include_directories(SbSpi 

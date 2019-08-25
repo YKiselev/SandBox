@@ -1,77 +1,104 @@
 
 #include "../include/SbCore/AppConfiguration.h"
 
+using ConfigValue = sb_spi::ConfigValue;
+
 namespace app
 {
-	void AppConfiguration::persist(const std::string& name) const
+	AppConfiguration::AppConfiguration()
 	{
 	}
-
-	void AppConfiguration::load(const std::string& name)
+	AppConfiguration::~AppConfiguration()
 	{
 	}
-
-	void AppConfiguration::loadAll(const std::string& name)
+	void AppConfiguration::release()
 	{
+		// no-op
 	}
-	void AppConfiguration::add(const std::string& name, sb_spi::IntValue& value)
+	void AppConfiguration::persist(const char* name) const
 	{
+		// todo
 	}
-	void AppConfiguration::addReadOnly(const std::string& name, const sb_spi::IntValue& value)
+	void AppConfiguration::load(const char* name)
 	{
+		// todo
 	}
-	void AppConfiguration::add(const std::string& name, sb_spi::FloatValue& value)
+	bool AppConfiguration::add(const char* name, ConfigValue& value)
 	{
+		std::lock_guard<std::shared_mutex> lock{ _mutex };
+		return _map.insert({ name, value }).second;
 	}
-	void AppConfiguration::addReadOnly(const std::string& name, const sb_spi::FloatValue& value)
+	bool AppConfiguration::remove(const char* name)
 	{
+		std::lock_guard<std::shared_mutex> lock{ _mutex };
+		return 1 == _map.erase(name);
 	}
-	std::string AppConfiguration::getString(const std::string& name) const
+	template <typename R, typename...Args>
+	R AppConfiguration::getValue(const char* name, R(ConfigValue::* mf)(Args...)const, Args...args) const
 	{
-		return std::string();
+		std::shared_lock<std::shared_mutex> lock{ _mutex };
+		auto p = _map.find(name);
+		if (p != _map.end())
+		{
+			return std::invoke(mf, p->second, args...);
+		}
+		return {};
 	}
-	void AppConfiguration::setString(const std::string& name, const std::string& value)
+	template <typename...Args>
+	void AppConfiguration::setValue(const char* name, void(ConfigValue::* mf)(Args...), Args...args)
 	{
+		auto p = _map.find(name);
+		if (p != _map.end())
+		{
+			std::invoke(mf, p->second, args...);
+		}
 	}
-	int AppConfiguration::getInt(const std::string& name) const
+	int AppConfiguration::getString(const char* name, char* dest, size_t capacity) const
 	{
-		return 0;
+		return getValue(name, &ConfigValue::getString, dest, capacity);
 	}
-	void AppConfiguration::setInt(const std::string& name, int value)
+	void AppConfiguration::setString(const char* name, const char* value)
 	{
+		setValue(name, &ConfigValue::setString, value);
 	}
-	float AppConfiguration::getFloat(const std::string& name) const
+	int AppConfiguration::getInt(const char* name) const
 	{
-		return 0.0f;
+		return getValue(name, &ConfigValue::getInt);
 	}
-	void AppConfiguration::setFloat(const std::string& name, float value)
+	void AppConfiguration::setInt(const char* name, int value)
 	{
+		setValue(name, &ConfigValue::setInt, value);
 	}
-	bool AppConfiguration::getBool(const std::string& name) const
+	unsigned long long AppConfiguration::getUllong(const char* name) const
 	{
-		return false;
+		return getValue(name, &ConfigValue::getUllong);
 	}
-	void AppConfiguration::setBool(const std::string& name, bool value)
+	void AppConfiguration::setUllong(const char* name, unsigned long long value)
 	{
+		setValue(name, &ConfigValue::setUllong, value);
 	}
-	
-	sb_spi::IntValue const* AppConfiguration::findInt(const std::string& name) const
+	float AppConfiguration::getFloat(const char* name) const
 	{
-		return nullptr;
+		return getValue(name, &ConfigValue::getFloat);
 	}
-	
-	sb_spi::FloatValue const* AppConfiguration::findFloat(const std::string& name) const
+	void AppConfiguration::setFloat(const char* name, float value)
 	{
-		return nullptr;
+		setValue(name, &ConfigValue::setFloat, value);
 	}
-	
-	sb_spi::BoolValue const* AppConfiguration::findBool(const std::string& name) const
+	double AppConfiguration::getDouble(const char* name) const
 	{
-		return nullptr;
+		return getValue(name, &ConfigValue::getDouble);
 	}
-	
-	sb_spi::StringValue const* AppConfiguration::findString(const std::string& name) const
+	void AppConfiguration::setDouble(const char* name, double value)
 	{
-		return nullptr;
+		setValue(name, &ConfigValue::setDouble, value);
+	}
+	bool AppConfiguration::getBool(const char* name) const
+	{
+		return getValue(name, &ConfigValue::getBool);
+	}
+	void AppConfiguration::setBool(const char* name, bool value)
+	{
+		setValue(name, &ConfigValue::setBool, value);
 	}
 }

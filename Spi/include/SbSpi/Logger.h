@@ -18,7 +18,7 @@ namespace sb_spi
 			Trace, Debug, Message, Warning, Error, Off
 		};
 
-		Logger();
+		Logger() = default;
 		Logger(LoggerDelegate* p);
 		Logger(std::shared_ptr<LoggerDelegate> p);
 
@@ -65,11 +65,6 @@ namespace sb_spi
 		virtual void doLog(Logger::Level level, const char* message) = 0;
 	};
 
-	std::shared_ptr<LoggerDelegate> make_shared(LoggerDelegate* ptr)
-	{
-		return std::shared_ptr<LoggerDelegate>(ptr, [](LoggerDelegate* p) { p->release(); });
-	}
-
 	// Logger factory
 	class LoggerFactory
 	{
@@ -98,19 +93,19 @@ namespace sb_spi
 	template <typename... Args>
 	inline void Logger::message(const char* fmt, Args...args)
 	{
-		log(Debug, fmt, args);
+		log(Message, fmt, args...);
 	}
 
 	template <typename... Args>
 	inline void Logger::warning(const char* fmt, Args...args)
 	{
-		log(Warning, fmt, args);
+		log(Warning, fmt, args...);
 	}
 
 	template <typename... Args>
 	inline void Logger::error(const char* fmt, Args...args)
 	{
-		log(Error, fmt, args);
+		log(Error, fmt, args...);
 	}
 
 	template <typename... Args>
@@ -123,10 +118,6 @@ namespace sb_spi
 			std::string s{ ss.str() };
 			log(level, s.c_str());
 		}
-	}
-
-	Logger::Logger()
-	{
 	}
 
 	Logger::Logger(LoggerDelegate* p) : Logger(make_shared(p))

@@ -67,3 +67,43 @@ TEST(Logger, TraceOff)
 
 	ASSERT_EQ("", md.buffer());
 }
+
+TEST(Logger, Debug)
+{
+	MyDelegate md{ Logger::Debug };
+	Logger logger{ &md };
+
+	logger.debug("{} {} {}", 1, 2, 3);
+
+	ASSERT_EQ("1 2 3", md.buffer());
+}
+
+TEST(Logger, Message)
+{
+	MyDelegate md{ Logger::Message };
+	Logger logger{ &md };
+
+	logger.message("{} {} {}", 1, 2, 3);
+
+	ASSERT_EQ("1 2 3", md.buffer());
+}
+
+TEST(Logger, Warning)
+{
+	MyDelegate md{ Logger::Warning };
+	Logger logger{ &md };
+
+	logger.warning("{} {} {}", 1, 2, 3);
+
+	ASSERT_EQ("1 2 3", md.buffer());
+}
+
+TEST(Logger, Error)
+{
+	MyDelegate md{ Logger::Error };
+	Logger logger{ &md };
+
+	logger.error("{} {} {}", 1, 2, 3);
+
+	ASSERT_EQ("1 2 3", md.buffer());
+}

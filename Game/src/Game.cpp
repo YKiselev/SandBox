@@ -3,12 +3,19 @@
 #include "sbgame_export.h"
 
 #ifndef SBGAME_EXPORT
-	#define SBGAME_EXPORT
+#define SBGAME_EXPORT
 #endif
 
-class GameImpl : public sb_spi::Game
+using namespace sb_spi;
+
+class GameImpl : public Game
 {
 public:
+	GameImpl(GameImport* gi) : _gi{ gi }
+	{
+		_gi->print(GameImport::Message, "Game ctor called.");
+	}
+
 	virtual const char* getName()
 	{
 		return "Default game #1";
@@ -16,18 +23,21 @@ public:
 
 	virtual void release()
 	{
+		_gi->print(GameImport::Message, "Game release() called.");
 		delete this;
 	}
 
-protected:
+private:
+	GameImport* _gi;
+
 	virtual ~GameImpl()
 	{
-		// do some cleanup
+		_gi->print(GameImport::Message, "Game ctor called.");
 	}
 };
 
 // warning : redeclaration of 'createGame' should not add 'dllexport' attribute [-Wdll-attribute-on-redeclaration]
-extern "C" SBGAME_EXPORT sb_spi::Game* createGame()
+extern "C" SBGAME_EXPORT sb_spi::Game* createGame(GameImport* gi)
 {
-	return new GameImpl{};
+	return new GameImpl{ gi };
 }
