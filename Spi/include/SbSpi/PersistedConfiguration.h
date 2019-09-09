@@ -4,16 +4,17 @@
 #include <mutex>
 #include <cstring>
 #include <shared_mutex>
-#include "SharedObject.h"
+#include "NonCopyable.h"
 
 namespace sb_spi
 {
 	//
 	// Configuration value - interface implemented by all final types of values.
 	//
-	class ConfigValue
+	class ConfigValue : public NonCopyable
 	{
 	public:
+		constexpr ConfigValue(const char* name);
 		virtual ~ConfigValue() = default;
 
 		virtual int getString(char* buf, size_t capacity) const = 0;
@@ -28,6 +29,11 @@ namespace sb_spi
 		virtual void setDouble(double value) = 0;
 		virtual bool getBool() const = 0;
 		virtual void setBool(bool value) = 0;
+
+		const char* name();
+
+	private:
+		const char* _name;
 	};
 
 	//
@@ -36,8 +42,8 @@ namespace sb_spi
 	class IntValue final : public ConfigValue
 	{
 	public:
-		IntValue();
-		explicit IntValue(int value);
+		IntValue(const char* name);
+		IntValue(const char* name, int value);
 		IntValue(const IntValue& src) = delete;
 		IntValue(IntValue&& src) = delete;
 		virtual ~IntValue();
@@ -78,8 +84,8 @@ namespace sb_spi
 	class UllongValue final : public ConfigValue
 	{
 	public:
-		UllongValue();
-		explicit UllongValue(unsigned long long value);
+		UllongValue(const char* name);
+		UllongValue(const char* name, unsigned long long value);
 		UllongValue(const UllongValue& src) = delete;
 		UllongValue(UllongValue&& src) = delete;
 		virtual ~UllongValue();
@@ -120,8 +126,8 @@ namespace sb_spi
 	class DoubleValue final : public ConfigValue
 	{
 	public:
-		DoubleValue();
-		explicit DoubleValue(double value);
+		DoubleValue(const char* name);
+		DoubleValue(const char* name, double value);
 		DoubleValue(const DoubleValue& src) = delete;
 		DoubleValue(DoubleValue&& src) = delete;
 		virtual ~DoubleValue();
@@ -162,8 +168,8 @@ namespace sb_spi
 	class FloatValue final : public ConfigValue
 	{
 	public:
-		FloatValue();
-		explicit FloatValue(float value);
+		FloatValue(const char* name);
+		FloatValue(const char* name, float value);
 		FloatValue(const FloatValue& src) = delete;
 		FloatValue(FloatValue&& src) = delete;
 		virtual ~FloatValue();
@@ -204,8 +210,8 @@ namespace sb_spi
 	class BoolValue final : public ConfigValue
 	{
 	public:
-		BoolValue();
-		explicit BoolValue(bool value);
+		BoolValue(const char* name);
+		BoolValue(const char* name, bool value);
 		BoolValue(const BoolValue& src) = delete;
 		BoolValue(BoolValue&& src) = delete;
 		virtual ~BoolValue();
@@ -246,8 +252,8 @@ namespace sb_spi
 	class StringValue final : public ConfigValue
 	{
 	public:
-		StringValue(size_t capacity);
-		StringValue(size_t capacity, const char* value);
+		StringValue(const char* name, size_t capacity);
+		StringValue(const char* name, size_t capacity, const char* value);
 		StringValue(const StringValue& src) = delete;
 		StringValue(StringValue&& src) = delete;
 		virtual ~StringValue();
@@ -271,7 +277,7 @@ namespace sb_spi
 		void set(const char* value);
 		int get(char* buf, size_t capacity) const;
 
-		size_t capacity() const
+		constexpr size_t capacity() const
 		{
 			return _capacity;
 		}
@@ -285,11 +291,11 @@ namespace sb_spi
 	//
 	// Configuration interface
 	//
-	class Configuration : public SharedObject
+	class Configuration : public NonCopyable
 	{
 	public:
-		virtual bool add(const char* name, ConfigValue& value) = 0;
-		virtual bool remove(const char* name) = 0;
+		virtual bool add(ConfigValue& value) = 0;
+		virtual bool remove(ConfigValue& value) = 0;
 
 		virtual int getString(const char* name, char* dest, size_t capacity) const = 0;
 		virtual void setString(const char* name, const char* value) = 0;

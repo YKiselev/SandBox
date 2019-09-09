@@ -10,6 +10,7 @@ target_sources(SbCore
 		src/AppWindow.cpp
 		src/AppConfiguration.cpp
 		src/AppLoggerFactory.cpp
+		src/AppFileSystem.cpp
 )
 
 target_include_directories(SbCore PUBLIC
@@ -17,7 +18,7 @@ target_include_directories(SbCore PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(SbCore SbCommon SbSpi glfw)
+target_link_libraries(SbCore SbCommon SbSpi SbPal glfw)
 
 add_subdirectory(test)
 

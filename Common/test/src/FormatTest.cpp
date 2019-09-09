@@ -9,13 +9,27 @@
 using namespace std::string_literals;
 using sb_com::format;
 
-TEST(Format, TooManySpecifiers)
+TEST(Format, NoArgTooManySpecifiers)
 {
 	try
 	{
 		std::ostringstream s;
 
-		format(s, "{}");//???????
+		format(s, "{}");
+
+		FAIL();
+	}
+	catch (std::out_of_range&)
+	{
+		// ok
+	}
+}
+
+TEST(Format, TooManySpecifiers)
+{
+	try
+	{
+		std::ostringstream s;
 
 		format(s, "{} {}", 1);
 
@@ -25,6 +39,15 @@ TEST(Format, TooManySpecifiers)
 	{
 		// ok
 	}
+}
+
+TEST(Format, StringSupplier)
+{
+	std::ostringstream s;
+
+	format(s, "{}", []() { return "test"; });
+
+	ASSERT_EQ("test"s, s.str());
 }
 
 TEST(Format, Mixed)
@@ -246,7 +269,7 @@ struct IsPointer<X*>
 	using Pointee = X;
 };
 
-TEST(A,B)
+TEST(A, B)
 {
 	bool v = IsPointer<std::vector<int>::iterator>::result;
 	std::cout << (v ? "fast" : "smart") << "\n";

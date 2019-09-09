@@ -5,12 +5,22 @@
 namespace sb_spi
 {
 	//
-	// IntValue
 	//
-	IntValue::IntValue()
+	//
+	constexpr ConfigValue::ConfigValue(const char* name) : _name{ name }
 	{
 	}
-	IntValue::IntValue(int value)
+	const char* ConfigValue::name()
+	{
+		return _name;
+	}
+	//
+	// IntValue
+	//
+	IntValue::IntValue(const char* name) : ConfigValue{ name }
+	{
+	}
+	IntValue::IntValue(const char* name, int value) : ConfigValue{ name }
 	{
 		set(value);
 	}
@@ -70,10 +80,10 @@ namespace sb_spi
 	//
 	// UllongValue
 	//
-	UllongValue::UllongValue()
+	UllongValue::UllongValue(const char* name) :ConfigValue{ name }
 	{
 	}
-	UllongValue::UllongValue(unsigned long long value) : _atomic{ value }
+	UllongValue::UllongValue(const char* name, unsigned long long value) : ConfigValue{ name }, _atomic{ value }
 	{
 	}
 	UllongValue::~UllongValue()
@@ -131,11 +141,11 @@ namespace sb_spi
 	//
 	// DoubleValue
 	//
-	DoubleValue::DoubleValue()
+	DoubleValue::DoubleValue(const char* name) :ConfigValue{ name }
 	{
 
 	}
-	DoubleValue::DoubleValue(double value) : _atomic{ value }
+	DoubleValue::DoubleValue(const char* name, double value) : ConfigValue{ name }, _atomic{ value }
 	{
 
 	}
@@ -195,10 +205,10 @@ namespace sb_spi
 	//
 	// FloatValue
 	//
-	FloatValue::FloatValue()
+	FloatValue::FloatValue(const char* name) :ConfigValue{ name }
 	{
 	}
-	FloatValue::FloatValue(float value) :_atomic{ value }
+	FloatValue::FloatValue(const char* name, float value) : ConfigValue{ name }, _atomic{ value }
 	{
 	}
 	FloatValue::~FloatValue()
@@ -256,10 +266,10 @@ namespace sb_spi
 	//
 	//
 	//
-	BoolValue::BoolValue()
+	BoolValue::BoolValue(const char* name) :ConfigValue{ name }
 	{
 	}
-	BoolValue::BoolValue(bool value) : _atomic{ value }
+	BoolValue::BoolValue(const char* name, bool value) : ConfigValue{ name }, _atomic{ value }
 	{
 	}
 	BoolValue::~BoolValue()
@@ -318,11 +328,11 @@ namespace sb_spi
 	//
 	// StringValue
 	//
-	StringValue::StringValue(size_t capacity) : _capacity{ capacity }, _value{ new char[capacity] }
+	StringValue::StringValue(const char* name, size_t capacity) : ConfigValue{ name }, _capacity{ capacity }, _value{ new char[capacity] }
 	{
 		set("");
 	}
-	StringValue::StringValue(size_t capacity, const char* value) : StringValue(capacity)
+	StringValue::StringValue(const char* name, size_t capacity, const char* value) : StringValue(name, capacity)
 	{
 		set(value);
 	}

@@ -6,10 +6,9 @@
 
 using namespace sb_spi;
 
-
 TEST(IntValue, Get)
 {
-	IntValue iv{ 123 };
+	IntValue iv{ "x", 123 };
 
 	ASSERT_EQ(123, iv.getInt());
 	ASSERT_EQ(123ull, iv.getUllong());
@@ -20,7 +19,7 @@ TEST(IntValue, Get)
 
 TEST(IntValue, SetInteger)
 {
-	IntValue iv{ 3 };
+	IntValue iv{ "x",3 };
 
 	iv.setInt(1);
 
@@ -33,7 +32,7 @@ TEST(IntValue, SetInteger)
 
 TEST(IntValue, SetUllong)
 {
-	IntValue iv{ 3 };
+	IntValue iv{ "x",3 };
 
 	iv.setUllong(2);
 
@@ -46,7 +45,7 @@ TEST(IntValue, SetUllong)
 
 TEST(IntValue, SetFloat)
 {
-	IntValue iv{ 2 };
+	IntValue iv{ "x", 2 };
 
 	iv.setFloat(3.f);
 
@@ -59,7 +58,7 @@ TEST(IntValue, SetFloat)
 
 TEST(IntValue, SetDouble)
 {
-	IntValue iv{ 2 };
+	IntValue iv{ "x", 2 };
 
 	iv.setDouble(3.0);
 
@@ -72,7 +71,7 @@ TEST(IntValue, SetDouble)
 
 TEST(IntValue, SetBool)
 {
-	IntValue iv{ 2 };
+	IntValue iv{ "x",2 };
 
 	iv.setBool(false);
 
@@ -85,7 +84,7 @@ TEST(IntValue, SetBool)
 
 TEST(IntValue, FromString)
 {
-	IntValue iv{ 123 };
+	IntValue iv{ "x",123 };
 
 	iv.setString("1234567890");
 
@@ -98,7 +97,7 @@ TEST(IntValue, FromString)
 
 TEST(IntValue, ToString)
 {
-	IntValue iv{ 123 };
+	IntValue iv{ "x",123 };
 
 	char buf[100];
 	const int r = iv.getString(buf, 100);
@@ -108,7 +107,7 @@ TEST(IntValue, ToString)
 
 TEST(UllongValue, Get)
 {
-	UllongValue v{ 123 };
+	UllongValue v{ "x",123 };
 
 	ASSERT_EQ(123, v.getInt());
 	ASSERT_EQ(123ull, v.getUllong());
@@ -119,7 +118,7 @@ TEST(UllongValue, Get)
 
 TEST(UllongValue, SetInteger)
 {
-	UllongValue v{ 3 };
+	UllongValue v{ "x",3 };
 
 	v.setInt(1);
 
@@ -132,7 +131,7 @@ TEST(UllongValue, SetInteger)
 
 TEST(UllongValue, SetUllong)
 {
-	UllongValue v{ 3 };
+	UllongValue v{ "x",3 };
 
 	v.setUllong(2);
 
@@ -145,7 +144,7 @@ TEST(UllongValue, SetUllong)
 
 TEST(UllongValue, SetFloat)
 {
-	UllongValue v{ 2 };
+	UllongValue v{ "x",2 };
 
 	v.setFloat(3.f);
 
@@ -158,7 +157,7 @@ TEST(UllongValue, SetFloat)
 
 TEST(UllongValue, SetDouble)
 {
-	UllongValue v{ 2 };
+	UllongValue v{ "x",2 };
 
 	v.setDouble(3.0);
 
@@ -171,7 +170,7 @@ TEST(UllongValue, SetDouble)
 
 TEST(UllongValue, SetBool)
 {
-	UllongValue v{ 2 };
+	UllongValue v{ "x",2 };
 
 	v.setBool(false);
 
@@ -184,7 +183,7 @@ TEST(UllongValue, SetBool)
 
 TEST(UllongValue, FromString)
 {
-	UllongValue v{ 123 };
+	UllongValue v{ "x",123 };
 
 	v.setString("1234567890");
 
@@ -197,7 +196,7 @@ TEST(UllongValue, FromString)
 
 TEST(UllongValue, ToString)
 {
-	UllongValue v{ 123 };
+	UllongValue v{ "x",123 };
 
 	char buf[100];
 	const int r = v.getString(buf, 100);
@@ -207,7 +206,7 @@ TEST(UllongValue, ToString)
 
 TEST(DoubleValue, Get)
 {
-	DoubleValue v{ 123 };
+	DoubleValue v{ "x",123 };
 
 	ASSERT_EQ(123, v.getInt());
 	ASSERT_EQ(123ull, v.getUllong());
@@ -218,7 +217,7 @@ TEST(DoubleValue, Get)
 
 TEST(DoubleValue, SetInteger)
 {
-	DoubleValue v{ 3 };
+	DoubleValue v{ "x",3 };
 
 	v.setInt(1);
 
@@ -231,7 +230,7 @@ TEST(DoubleValue, SetInteger)
 
 TEST(DoubleValue, SetUllong)
 {
-	DoubleValue v{ 3.0 };
+	DoubleValue v{ "x",3.0 };
 
 	v.setUllong(2);
 
@@ -244,7 +243,7 @@ TEST(DoubleValue, SetUllong)
 
 TEST(DoubleValue, SetFloat)
 {
-	DoubleValue v{ 2.0 };
+	DoubleValue v{ "x",2.0 };
 
 	v.setFloat(3.f);
 
@@ -257,7 +256,7 @@ TEST(DoubleValue, SetFloat)
 
 TEST(DoubleValue, SetDouble)
 {
-	DoubleValue v{ 2.0 };
+	DoubleValue v{ "x",2.0 };
 
 	v.setDouble(3.0);
 
@@ -270,7 +269,7 @@ TEST(DoubleValue, SetDouble)
 
 TEST(DoubleValue, SetBool)
 {
-	DoubleValue v{ 2.0 };
+	DoubleValue v{ "x",2.0 };
 
 	v.setBool(false);
 
@@ -283,7 +282,7 @@ TEST(DoubleValue, SetBool)
 
 TEST(DoubleValue, FromString)
 {
-	DoubleValue v;
+	DoubleValue v{ "x" };
 
 	v.setString("123.4567");
 
@@ -296,7 +295,7 @@ TEST(DoubleValue, FromString)
 
 TEST(DoubleValue, ToString)
 {
-	DoubleValue v{ 3.14 };
+	DoubleValue v{ "x",3.14 };
 
 	char buf[100];
 	const int r = v.getString(buf, 100);
@@ -306,7 +305,7 @@ TEST(DoubleValue, ToString)
 
 TEST(FloatValue, Get)
 {
-	FloatValue v{ 123.f };
+	FloatValue v{ "x",123.f };
 
 	ASSERT_EQ(123, v.getInt());
 	ASSERT_EQ(123ull, v.getUllong());
@@ -317,7 +316,7 @@ TEST(FloatValue, Get)
 
 TEST(FloatValue, SetInteger)
 {
-	FloatValue v{ 3.f };
+	FloatValue v{ "x",3.f };
 
 	v.setInt(1);
 
@@ -330,7 +329,7 @@ TEST(FloatValue, SetInteger)
 
 TEST(FloatValue, SetUllong)
 {
-	FloatValue v{ 3.f };
+	FloatValue v{ "x",3.f };
 
 	v.setUllong(2);
 
@@ -343,7 +342,7 @@ TEST(FloatValue, SetUllong)
 
 TEST(FloatValue, SetFloat)
 {
-	FloatValue v{ 2.f };
+	FloatValue v{ "x",2.f };
 
 	v.setFloat(3.f);
 
@@ -356,7 +355,7 @@ TEST(FloatValue, SetFloat)
 
 TEST(FloatValue, SetDouble)
 {
-	FloatValue v{ 2.f };
+	FloatValue v{ "x",2.f };
 
 	v.setDouble(3.0);
 
@@ -369,7 +368,7 @@ TEST(FloatValue, SetDouble)
 
 TEST(FloatValue, SetBool)
 {
-	FloatValue v{ 2.f };
+	FloatValue v{ "x",2.f };
 
 	v.setBool(false);
 
@@ -382,7 +381,7 @@ TEST(FloatValue, SetBool)
 
 TEST(FloatValue, FromString)
 {
-	FloatValue v;
+	FloatValue v{ "x" };
 
 	v.setString("123.4567");
 
@@ -395,7 +394,7 @@ TEST(FloatValue, FromString)
 
 TEST(FloatValue, ToString)
 {
-	FloatValue v{ 3.14f };
+	FloatValue v{ "x",3.14f };
 
 	char buf[100];
 	const int r = v.getString(buf, 100);
@@ -405,7 +404,7 @@ TEST(FloatValue, ToString)
 
 TEST(BoolValue, Get)
 {
-	BoolValue v{ true };
+	BoolValue v{ "x",true };
 
 	ASSERT_EQ(1, v.getInt());
 	ASSERT_EQ(1ull, v.getUllong());
@@ -416,7 +415,7 @@ TEST(BoolValue, Get)
 
 TEST(BoolValue, SetInteger)
 {
-	BoolValue v;
+	BoolValue v{ "x" };
 
 	v.setInt(1);
 
@@ -429,7 +428,7 @@ TEST(BoolValue, SetInteger)
 
 TEST(BoolValue, SetUllong)
 {
-	BoolValue v;
+	BoolValue v{ "x" };
 
 	v.setUllong(2);
 
@@ -442,7 +441,7 @@ TEST(BoolValue, SetUllong)
 
 TEST(BoolValue, SetFloat)
 {
-	BoolValue v;
+	BoolValue v{ "x" };
 
 	v.setFloat(3.f);
 
@@ -455,7 +454,7 @@ TEST(BoolValue, SetFloat)
 
 TEST(BoolValue, SetDouble)
 {
-	BoolValue v;
+	BoolValue v{ "x" };
 
 	v.setDouble(3.0);
 
@@ -468,7 +467,7 @@ TEST(BoolValue, SetDouble)
 
 TEST(BoolValue, SetBool)
 {
-	BoolValue v;
+	BoolValue v{ "x" };
 
 	v.setBool(false);
 
@@ -481,7 +480,7 @@ TEST(BoolValue, SetBool)
 
 TEST(BoolValue, FromString)
 {
-	BoolValue v;
+	BoolValue v{ "x" };
 
 	v.setString("yes");
 
@@ -494,7 +493,7 @@ TEST(BoolValue, FromString)
 
 TEST(BoolValue, ToString)
 {
-	BoolValue v{ true };
+	BoolValue v{ "x",true };
 
 	char buf[10];
 	const int r = v.getString(buf, 10);
@@ -504,7 +503,7 @@ TEST(BoolValue, ToString)
 
 TEST(StringValue, FromString)
 {
-	StringValue v{ 20 };
+	StringValue v{ "x",20 };
 	char buf[10];
 
 	int r = v.getString(buf, 10);
@@ -517,7 +516,7 @@ TEST(StringValue, FromString)
 	ASSERT_EQ("Test", std::string{ buf });
 	ASSERT_EQ(4, r);
 }
-
+/*
 #include <unordered_map>
 
 void update(std::unordered_map<std::string, int>& map, const char* key)
@@ -525,7 +524,7 @@ void update(std::unordered_map<std::string, int>& map, const char* key)
 	const int v = map[key];
 	map[key] = v + 1;
 }
-/*
+
 TEST(StringMap, Keys)
 {
 	const char* const keys[] = { "a","b","c","d","e" };

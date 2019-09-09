@@ -3,6 +3,7 @@
 #include <memory>
 #include <sstream>
 #include "SharedObject.h"
+#include "NonCopyable.h"
 #include "SbCommon/Format.h"
 
 namespace sb_spi
@@ -21,6 +22,8 @@ namespace sb_spi
 		Logger() = default;
 		Logger(LoggerDelegate* p);
 		Logger(std::shared_ptr<LoggerDelegate> p);
+		Logger(const Logger& src) = default;
+		~Logger() = default;
 
 		void delegateTo(std::shared_ptr<LoggerDelegate> p);
 		void delegateTo(LoggerDelegate* p);
@@ -66,7 +69,7 @@ namespace sb_spi
 	};
 
 	// Logger factory
-	class LoggerFactory
+	class LoggerFactory : public NonCopyable
 	{
 	public:
 		LoggerFactory() = default;
@@ -78,6 +81,9 @@ namespace sb_spi
 		virtual LoggerDelegate* getDelegate(const char* name) = 0;
 	};
 
+	//
+	// Inline methods
+	//
 	template <typename... Args>
 	inline void Logger::trace(const char* fmt, Args...args)
 	{
@@ -120,24 +126,6 @@ namespace sb_spi
 		}
 	}
 
-	Logger::Logger(LoggerDelegate* p) : Logger(make_shared(p))
-	{
-	}
-
-	Logger::Logger(std::shared_ptr<LoggerDelegate> p) : _delegate{ p }
-	{
-	}
-
-	void Logger::delegateTo(std::shared_ptr<LoggerDelegate> p)
-	{
-		_delegate = p;
-	}
-
-	void Logger::delegateTo(LoggerDelegate* p)
-	{
-		delegateTo(make_shared(p));
-	}
-
 	inline void Logger::trace(const char* msg)
 	{
 		log(Trace, msg);
@@ -170,24 +158,5 @@ namespace sb_spi
 		{
 			p->doLog(level, msg);
 		}
-	}
-
-	void Logger::treshold(Level value)
-	{
-		LoggerDelegate* const p = _delegate.get();
-		if (p)
-		{
-			p->treshold(value);
-		}
-	}
-
-	Logger::Level Logger::treshold()
-	{
-		LoggerDelegate* const p = _delegate.get();
-		if (p)
-		{
-			return p->treshold();
-		}
-		return Off;
 	}
 }

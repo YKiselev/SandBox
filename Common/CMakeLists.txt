@@ -2,6 +2,7 @@
 
 add_library (SbCommon
 	src/FormatBuffer.cpp
+	src/StringConversion.cpp
 )
 
 target_include_directories(SbCommon PUBLIC

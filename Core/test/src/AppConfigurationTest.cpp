@@ -7,19 +7,19 @@ using namespace sb_spi;
 TEST(AppConfiguration, Dummy)
 {
 	AppConfiguration cfg;
-	IntValue iv{ 100 };
-	UllongValue ullv{ 0xffffff };
-	DoubleValue dv{ 3.14 };
-	FloatValue fv{ 3.14f };
-	BoolValue bv{ true };
-	StringValue sv{ 20, "Test" };
+	IntValue iv{ "amount", 100 };
+	UllongValue ullv{ "color", 0xffffff };
+	DoubleValue dv{ "pi", 3.14 };
+	FloatValue fv{ "velocity", 3.14f };
+	BoolValue bv{ "flag", true };
+	StringValue sv{ "name", 20, "Test" };
 
-	ASSERT_TRUE(cfg.add("amount", iv));
-	ASSERT_TRUE(cfg.add("color", ullv));
-	ASSERT_TRUE(cfg.add("pi", dv));
-	ASSERT_TRUE(cfg.add("velocity", fv));
-	ASSERT_TRUE(cfg.add("flag", bv));
-	ASSERT_TRUE(cfg.add("name", sv));
+	ASSERT_TRUE(cfg.add(iv));
+	ASSERT_TRUE(cfg.add(ullv));
+	ASSERT_TRUE(cfg.add(dv));
+	ASSERT_TRUE(cfg.add(fv));
+	ASSERT_TRUE(cfg.add(bv));
+	ASSERT_TRUE(cfg.add(sv));
 
 	ASSERT_EQ(100, cfg.getInt("amount"));
 	ASSERT_EQ(0xffffff, cfg.getUllong("color"));
@@ -44,6 +44,6 @@ TEST(AppConfiguration, Dummy)
 	ASSERT_NEAR(1.23f, cfg.getFloat("velocity"), 0.1);
 	ASSERT_FALSE(cfg.getBool("flag"));
 
-	ASSERT_TRUE(cfg.remove("name"));
-	ASSERT_TRUE(cfg.remove("amount"));
+	ASSERT_TRUE(cfg.remove(sv));
+	ASSERT_TRUE(cfg.remove(iv));
 }

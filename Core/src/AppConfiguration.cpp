@@ -11,9 +11,13 @@ namespace app
 	AppConfiguration::~AppConfiguration()
 	{
 	}
-	void AppConfiguration::release()
+	void AppConfiguration::init()
 	{
-		// no-op
+		//??????
+	}
+	void AppConfiguration::shutdown()
+	{
+		//?????????????
 	}
 	void AppConfiguration::persist(const char* name) const
 	{
@@ -23,15 +27,15 @@ namespace app
 	{
 		// todo
 	}
-	bool AppConfiguration::add(const char* name, ConfigValue& value)
+	bool AppConfiguration::add(ConfigValue& value)
 	{
 		std::lock_guard<std::shared_mutex> lock{ _mutex };
-		return _map.insert({ name, value }).second;
+		return _map.insert({ value.name(), value }).second;
 	}
-	bool AppConfiguration::remove(const char* name)
+	bool AppConfiguration::remove(ConfigValue& value)
 	{
 		std::lock_guard<std::shared_mutex> lock{ _mutex };
-		return 1 == _map.erase(name);
+		return 1 == _map.erase(value.name());
 	}
 	template <typename R, typename...Args>
 	R AppConfiguration::getValue(const char* name, R(ConfigValue::* mf)(Args...)const, Args...args) const

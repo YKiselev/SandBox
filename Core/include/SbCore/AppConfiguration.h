@@ -11,13 +11,15 @@ namespace app
 	public:
 		AppConfiguration();
 		virtual ~AppConfiguration();
-		void release() override;
+
+		void init();
+		void shutdown();
 
 		void persist(const char* name) const override;
 		void load(const char* name) override;
 
-		bool add(const char* name, sb_spi::ConfigValue& value) override;
-		bool remove(const char* name) override;
+		bool add(sb_spi::ConfigValue& value) override;
+		bool remove(sb_spi::ConfigValue& value) override;
 
 		int getString(const char* name, char* dest, size_t capacity) const override;
 		void setString(const char* name, const char* value) override;
@@ -35,6 +37,7 @@ namespace app
 	private:
 		mutable std::shared_mutex _mutex;
 		std::unordered_map<std::string, sb_spi::ConfigValue&> _map;
+		bool _initialized = false;
 
 		template <typename R, typename...Args>
 		R getValue(const char* name, R(sb_spi::ConfigValue::* mf)(Args...)const, Args...args) const;

@@ -8,6 +8,6 @@ namespace app
 		App();
 		~App();
 
-		int run();
+		int run(int argc, char* argv[]);
 	};
 }

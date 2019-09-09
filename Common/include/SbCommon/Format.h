@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <string>
+#include <functional>
 
 
 namespace sb_com
@@ -43,7 +44,6 @@ namespace sb_com
 			const static C o = static_cast<C>('o');
 			const static C x = static_cast<C>('x');
 			const static C X = static_cast<C>('X');
-			const static C star = static_cast<C>('*');
 		};
 
 		template <typename... Tail>
@@ -71,13 +71,25 @@ namespace sb_com
 			{
 				if (index == 0)
 				{
-					return op(value);
+					return op(unwrap(value));
 				}
 				return Base::map(index - 1, op);
 			}
 
 		private:
 			const T value;
+
+			template <typename V, typename std::enable_if_t<std::is_invocable<V>::value, int> = 0>
+			static auto unwrap(V src)
+			{
+				return src();
+			}
+
+			template <typename V, typename std::enable_if_t<!std::is_invocable<V>::value, int> = 0>
+			static auto unwrap(V src)
+			{
+				return src;
+			}
 		};
 
 		enum Flags : int
@@ -192,54 +204,38 @@ namespace sb_com
 						}
 
 						// Read width
-						if (*fmt == L::star)
+						if (width == 0 && *fmt == L::zero)
 						{
-							// todo ?????? width = av.map(avIdx++, toInteger);
-							fmt++;
+							throw format_error("Wrong width!");
 						}
-						else
+						while (*fmt)
 						{
-							if (width == 0 && *fmt == L::zero)
+							const C ch = *fmt;
+							if (ch < L::zero || ch > L::nine)
 							{
-								throw format_error("Wrong width!");
+								break;
 							}
-							while (*fmt)
-							{
-								const C ch = *fmt;
-								if (ch < L::zero || ch > L::nine)
-								{
-									break;
-								}
-								width = 10 * width + static_cast<int>(ch - L::zero);
-								fmt++;
-							}
+							width = 10 * width + static_cast<int>(ch - L::zero);
+							fmt++;
 						}
 
 						// Read precision
 						if (*fmt == L::dot)
 						{
 							fmt++;
-							if (*fmt == L::star)
+							while (*fmt)
 							{
-								// todo precision = av.map(avIdx++, toInteger);
-								fmt++;
-							}
-							else
-							{
-								while (*fmt)
+								const C ch = *fmt;
+								if (precision == 0 && ch == L::zero)
 								{
-									const C ch = *fmt;
-									if (precision == 0 && ch == L::zero)
-									{
-										throw format_error("Wrong precision!");
-									}
-									if (ch < L::zero || ch > L::nine)
-									{
-										break;
-									}
-									precision = 10 * precision + static_cast<int>(ch - L::zero);
-									fmt++;
+									throw format_error("Wrong precision!");
 								}
+								if (ch < L::zero || ch > L::nine)
+								{
+									break;
+								}
+								precision = 10 * precision + static_cast<int>(ch - L::zero);
+								fmt++;
 							}
 						}
 
@@ -312,15 +308,22 @@ namespace sb_com
 		}
 	}
 
+	//
+	// Forwards non-null supplied string to the output stream
+	//
 	template <typename S, typename C = S::char_type>
 	void format(S & out, const C * fmt)
 	{
 		if (fmt)
 		{
-			detail::format(out, fmt, detail::Arguments<int>{ 0 }, 0);
+			detail::format(out, fmt, detail::Arguments{}, 0);
 		}
 	}
 
+	//
+	// Prints result of formatting of supplied arguments using provided format string to the output stream.
+	// Format string is expected to contain placeholders of the form {[index[:[flags][width][.precision][specifier]]]}
+	//
 	template <typename S, typename C = S::char_type, typename... Args>
 	void format(S& out, const C* fmt, Args...args)
 	{

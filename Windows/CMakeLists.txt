@@ -5,7 +5,8 @@ cmake_minimum_required (VERSION 3.10)
 
 add_library (SbWindows
 	src/WindowsErrorFormat.cpp
-	src/WindowsDynamicLibrary.cpp
+	src/DynamicLibrary.cpp
+	src/WindowsPal.cpp
 )
 
 target_include_directories(SbWindows PUBLIC
