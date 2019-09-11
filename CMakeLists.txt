@@ -69,9 +69,5 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 					EXCLUDE_FROM_ALL)
 ]]
 
-if(WIN32)
-	add_subdirectory (Windows)
-endif()
-
 # Next line results in error: install(EXPORT "SandBoxConfig" ...) includes target "SbCore" which requires target "glfw3" that is not in the export set.
 #install(EXPORT SandBoxConfig NAMESPACE SandBox:: DESTINATION lib)

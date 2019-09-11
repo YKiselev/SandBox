@@ -1,5 +1,5 @@
 
-#include "../include/SbWindows/WindowsPal.h"
+#include "../../include/SbPal/Pal.h"
 #include <ShlObj.h>
 
 namespace sb_pal

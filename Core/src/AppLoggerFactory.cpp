@@ -7,13 +7,13 @@ using namespace sb_spi;
 
 namespace
 {
-	class AppLoggerDelegate : public LoggerDelegate
+	class DefaultNamedLogger : public NamedLogger
 	{
 	public:
-		AppLoggerDelegate(app::LoggerSink& sink, const char* name) : _treshold{ Logger::Message }, _sink{ sink }, _name{ name }
+		DefaultNamedLogger(app::LoggerSink& sink, const char* name) : _treshold{ Logger::Info }, _sink{ sink }, _name{ name }
 		{
 		}
-		virtual ~AppLoggerDelegate()
+		virtual ~DefaultNamedLogger()
 		{
 		}
 		void release() override
@@ -22,18 +22,22 @@ namespace
 		}
 		Logger::Level treshold() const override
 		{
-			return _treshold;
+			return _treshold.load(std::memory_order_acquire);
 		}
 		void treshold(Logger::Level value) override
 		{
-			_treshold.store(value);
+			_treshold.store(value, std::memory_order_release);
 		}
-		void doLog(Logger::Level level, const char* message) override
+		void log(Logger::Level level, const char* message) override
 		{
 			if (level >= _treshold)
 			{
 				_sink.put(_name.c_str(), level, message);
 			}
+		}
+		const char* name() const override
+		{
+			return _name.c_str();
 		}
 
 	private:
@@ -46,6 +50,33 @@ namespace
 
 namespace app
 {
+	const char* LoggerSink::toString(sb_spi::Logger::Level level) const
+	{
+		switch (level)
+		{
+		case sb_spi::Logger::Trace:
+			return "TRACE";
+
+		case sb_spi::Logger::Debug:
+			return "DEBUG";
+
+		case sb_spi::Logger::Info:
+			return "INFO";
+
+		case sb_spi::Logger::Warning:
+			return "WARNING";
+
+		case sb_spi::Logger::Error:
+			return "ERROR";
+
+		case sb_spi::Logger::Off:
+			return "OFF";
+
+		default:
+			return nullptr;
+		}
+	}
+
 	//
 	// File sink
 	//
@@ -58,7 +89,7 @@ namespace app
 	}
 	void FileSink::put(const char* name, sb_spi::Logger::Level level, const char* message)
 	{
-		std::fprintf(_file.get(), "%s %i : %s\n", name, level, message);
+		std::fprintf(_file.get(), "%s %s : %s\n", name, toString(level), message);
 	}
 
 	//
@@ -72,7 +103,7 @@ namespace app
 	}
 	void ConsoleSink::put(const char* name, sb_spi::Logger::Level level, const char* message)
 	{
-		std::printf("%s %i : %s\n", name, level, message);
+		std::printf("%s %s : %s\n", name, toString(level), message);
 	}
 
 	//
@@ -86,13 +117,13 @@ namespace app
 	{
 	}
 
-	LoggerDelegate* AppLoggerFactory::getDelegate(const char* name)
+	NamedLogger* AppLoggerFactory::getDelegate(const char* name)
 	{
 		while (true)
 		{
 			{
 				std::shared_lock lock{ _mutex };
-				std::unique_ptr<LoggerDelegate>& p = _delegates[name];
+				std::unique_ptr<NamedLogger>& p = _delegates[name];
 				if (p)
 				{
 					return p.get();
@@ -100,10 +131,10 @@ namespace app
 			}
 
 			std::unique_lock lock{ _mutex };
-			std::unique_ptr<LoggerDelegate>& p = _delegates[name];
+			std::unique_ptr<NamedLogger>& p = _delegates[name];
 			if (!p)
 			{
-				p.reset(new AppLoggerDelegate(*_sink, name));
+				p.reset(new DefaultNamedLogger(*_sink, name));
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 
-#include "../include/SbWindows/WindowsErrorFormat.h"
+#include "WindowsErrorFormat.h"
 #include <Windows.h>
 #include <vector>
 #include <memory>

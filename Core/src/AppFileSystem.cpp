@@ -10,6 +10,20 @@ namespace
 	{
 		return 0 == strcmp(app::DefaultGameFolder, name);
 	}
+
+	class ReadableFile : public sb_spi::Readable
+	{
+	public:
+		ReadableFile(FILE* file) : _file{ file, std::fclose }
+		{
+		}
+		virtual ~ReadableFile()
+		{
+		}
+
+	private:
+		std::unique_ptr<FILE, int(*)(FILE*)> _file;
+	};
 }
 
 namespace app
@@ -25,13 +39,13 @@ namespace app
 	}
 	sb_spi::Readable* Folder::openReadable(const char* name)
 	{
-		_logger.debug("Trying {}...", sb_com::narrow(_base.c_str()));
+		_logger.debug("Trying {}...", [&]() {return sb_com::narrow(_base.c_str()); });
 
 		return nullptr;
 	}
 	sb_spi::Writable* Folder::openWritable(const char* name)
 	{
-		_logger.debug("Trying {}...", sb_com::narrow(_base.c_str()));
+		_logger.debug("Trying {}...", [&]() { return sb_com::narrow(_base.c_str()); });
 
 		return nullptr;
 	}
@@ -54,7 +68,7 @@ namespace app
 			shutdown();
 		}
 		_logger.delegateTo(cs.loggerFactory->getDelegate("FileSystem"));
-		_logger.message("Initializing...");
+		_logger.info("Initializing...");
 
 		_userHome = sb_pal::getUserHome();
 		_base = cs.arguments->currentDir;
@@ -69,7 +83,7 @@ namespace app
 		{
 			return;
 		}
-		_logger.message("Shutting down...");
+		_logger.info("Shutting down...");
 		_folders.clear();
 		_initialized = false;
 	}
@@ -80,7 +94,7 @@ namespace app
 		{
 			return;
 		}
-		_logger.message("Selecting \"{}\"...", game);
+		_logger.info("Selecting \"{}\"...", game);
 		// add current game user folder
 		_folders.emplace_back(_userHome / game, _logger);
 		// add current game folder
@@ -94,7 +108,7 @@ namespace app
 	{
 		for (Folder& folder : _folders)
 		{
-			
+
 			sb_spi::Readable* r = folder.openReadable(name);
 			if (r)
 			{

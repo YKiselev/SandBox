@@ -2,7 +2,17 @@
 
 include(GoogleTest)
 
-add_executable(SbPalTests src/Dummy.cpp)
+set(SbPalTests_SOURCES
+	src/Dummy.cpp
+)
+
+if(WIN32)
+	set(SbPalTests_SOURCES ${SbPalTest_SOURCES} 
+		src/Windows/WindowsErrorFormatTest.cpp
+	)
+endif()
+
+add_executable(SbPalTests ${SbPalTests_SOURCES})
 
 target_link_libraries(SbPalTests 
 	SbPal 

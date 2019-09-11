@@ -8,25 +8,27 @@
 
 namespace sb_spi
 {
-	class LoggerDelegate;
+	class NamedLogger;
 
+	//
 	// Client logger API
+	//
 	class Logger
 	{
 	public:
 		enum Level
 		{
-			Trace, Debug, Message, Warning, Error, Off
+			Trace, Debug, Info, Warning, Error, Off
 		};
 
 		Logger() = default;
-		Logger(LoggerDelegate* p);
-		Logger(std::shared_ptr<LoggerDelegate> p);
+		Logger(NamedLogger* p);
+		Logger(std::shared_ptr<NamedLogger> p);
 		Logger(const Logger& src) = default;
 		~Logger() = default;
 
-		void delegateTo(std::shared_ptr<LoggerDelegate> p);
-		void delegateTo(LoggerDelegate* p);
+		void delegateTo(std::shared_ptr<NamedLogger> p);
+		void delegateTo(NamedLogger* p);
 
 		template <typename... Args>
 		void trace(const char* fmt, Args...args);
@@ -37,8 +39,8 @@ namespace sb_spi
 		void debug(const char* msg);
 
 		template <typename... Args>
-		void message(const char* fmt, Args...args);
-		void message(const char* msg);
+		void info(const char* fmt, Args...args);
+		void info(const char* msg);
 
 		template <typename... Args>
 		void warning(const char* fmt, Args...args);
@@ -56,19 +58,24 @@ namespace sb_spi
 		Level treshold();
 
 	private:
-		std::shared_ptr<LoggerDelegate> _delegate;
+		std::shared_ptr<NamedLogger> _delegate;
 	};
 
-	// Logger delegate used by Logger class
-	class LoggerDelegate : public virtual SharedObject
+	//
+	// Named logger delegate used by Logger class
+	//
+	class NamedLogger : public virtual SharedObject
 	{
 	public:
 		virtual Logger::Level treshold() const = 0;
 		virtual void treshold(Logger::Level value) = 0;
-		virtual void doLog(Logger::Level level, const char* message) = 0;
+		virtual const char* name() const = 0;
+		virtual void log(Logger::Level level, const char* message) = 0;
 	};
 
+	//
 	// Logger factory
+	//
 	class LoggerFactory : public NonCopyable
 	{
 	public:
@@ -78,7 +85,7 @@ namespace sb_spi
 
 		LoggerFactory& operator = (const LoggerFactory&) = delete;
 
-		virtual LoggerDelegate* getDelegate(const char* name) = 0;
+		virtual NamedLogger* getDelegate(const char* name) = 0;
 	};
 
 	//
@@ -97,9 +104,9 @@ namespace sb_spi
 	}
 
 	template <typename... Args>
-	inline void Logger::message(const char* fmt, Args...args)
+	inline void Logger::info(const char* fmt, Args...args)
 	{
-		log(Message, fmt, args...);
+		log(Info, fmt, args...);
 	}
 
 	template <typename... Args>
@@ -136,9 +143,9 @@ namespace sb_spi
 		log(Debug, msg);
 	}
 
-	inline void Logger::message(const char* msg)
+	inline void Logger::info(const char* msg)
 	{
-		log(Debug, msg);
+		log(Info, msg);
 	}
 
 	inline void Logger::warning(const char* msg)
@@ -153,10 +160,10 @@ namespace sb_spi
 
 	inline void Logger::log(Level level, const char* msg)
 	{
-		LoggerDelegate* const p = _delegate.get();
+		NamedLogger* const p = _delegate.get();
 		if (p && level >= p->treshold())
 		{
-			p->doLog(level, msg);
+			p->log(level, msg);
 		}
 	}
 }

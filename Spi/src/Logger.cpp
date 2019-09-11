@@ -3,26 +3,26 @@
 
 namespace sb_spi
 {
-	Logger::Logger(LoggerDelegate* p) : Logger(make_shared(p))
+	Logger::Logger(NamedLogger* p) : Logger(make_shared(p))
 	{
 	}
 
-	Logger::Logger(std::shared_ptr<LoggerDelegate> p) : _delegate{ p }
+	Logger::Logger(std::shared_ptr<NamedLogger> p) : _delegate{ p }
 	{
 	}
 
-	void Logger::delegateTo(std::shared_ptr<LoggerDelegate> p)
+	void Logger::delegateTo(std::shared_ptr<NamedLogger> p)
 	{
 		_delegate = p;
 	}
 
-	void Logger::delegateTo(LoggerDelegate* p)
+	void Logger::delegateTo(NamedLogger* p)
 	{
 		delegateTo(make_shared(p));
 	}
 	void Logger::treshold(Level value)
 	{
-		LoggerDelegate* const p = _delegate.get();
+		NamedLogger* const p = _delegate.get();
 		if (p)
 		{
 			p->treshold(value);
@@ -31,7 +31,7 @@ namespace sb_spi
 
 	Logger::Level Logger::treshold()
 	{
-		LoggerDelegate* const p = _delegate.get();
+		NamedLogger* const p = _delegate.get();
 		if (p)
 		{
 			return p->treshold();

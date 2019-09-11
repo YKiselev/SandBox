@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/SbWindows/DynamicLibrary.h"
+#include "../../include/SbPal/DynamicLibrary.h"
 #include <Windows.h>
 #include <stdexcept>
 #include "SbCommon/StringConversion.h"

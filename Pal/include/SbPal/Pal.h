@@ -1,7 +1,8 @@
 #pragma once
 
-#ifdef WIN32
-#include "SbWindows/WindowsPal.h"
-#elif LINUX
-// todo ?
-#endif
+#include <filesystem>
+
+namespace sb_pal
+{
+	std::filesystem::path getUserHome();
+}

@@ -3,10 +3,8 @@
 include(GoogleTest)
 
 add_executable(SbCommonTests 
-	src/FormatBufferTest.cpp
 	src/StringConversionTest.cpp
 	src/FormatTest.cpp
-	src/Format3Test.cpp
 )
 
 target_link_libraries(SbCommonTests 

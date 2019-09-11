@@ -2,7 +2,7 @@
 #include <string>
 #include <Windows.h>
 #include "gtest/gtest.h"
-#include "SbWindows/WindowsErrorFormat.h"
+#include "../../../src/Windows/WindowsErrorFormat.h"
 
 TEST(ErrorFormat, Simple)
 {

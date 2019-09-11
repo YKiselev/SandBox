@@ -4,10 +4,10 @@
 
 using namespace sb_spi;
 
-class MyDelegate : public sb_spi::LoggerDelegate
+class MyNamedLogger : public sb_spi::NamedLogger
 {
 public:
-	MyDelegate(Logger::Level treshold) : _treshold{ treshold }, _released{ false }
+	MyNamedLogger(Logger::Level treshold) : _treshold{ treshold }, _released{ false }
 	{
 	}
 
@@ -21,9 +21,13 @@ public:
 		_treshold = value;
 	}
 
-	void doLog(Logger::Level level, const char* message) override
+	void log(Logger::Level level, const char* message) override
 	{
 		_buf << message;
+	}
+	const char* name()const override
+	{
+		return "MyLogger";
 	}
 
 	void release() override
@@ -50,7 +54,7 @@ private:
 
 TEST(Logger, TraceOn)
 {
-	MyDelegate md{ Logger::Trace };
+	MyNamedLogger md{ Logger::Trace };
 	Logger logger{ &md };
 
 	logger.trace("{} {} {}", 1, 2, 3);
@@ -60,7 +64,7 @@ TEST(Logger, TraceOn)
 
 TEST(Logger, TraceOff)
 {
-	MyDelegate md{ Logger::Debug };
+	MyNamedLogger md{ Logger::Debug };
 	Logger logger{ &md };
 
 	logger.trace("{} {} {}", 1, 2, 3);
@@ -70,7 +74,7 @@ TEST(Logger, TraceOff)
 
 TEST(Logger, Debug)
 {
-	MyDelegate md{ Logger::Debug };
+	MyNamedLogger md{ Logger::Debug };
 	Logger logger{ &md };
 
 	logger.debug("{} {} {}", 1, 2, 3);
@@ -78,19 +82,19 @@ TEST(Logger, Debug)
 	ASSERT_EQ("1 2 3", md.buffer());
 }
 
-TEST(Logger, Message)
+TEST(Logger, Info)
 {
-	MyDelegate md{ Logger::Message };
+	MyNamedLogger md{ Logger::Info };
 	Logger logger{ &md };
 
-	logger.message("{} {} {}", 1, 2, 3);
+	logger.info("{} {} {}", 1, 2, 3);
 
 	ASSERT_EQ("1 2 3", md.buffer());
 }
 
 TEST(Logger, Warning)
 {
-	MyDelegate md{ Logger::Warning };
+	MyNamedLogger md{ Logger::Warning };
 	Logger logger{ &md };
 
 	logger.warning("{} {} {}", 1, 2, 3);
@@ -100,7 +104,7 @@ TEST(Logger, Warning)
 
 TEST(Logger, Error)
 {
-	MyDelegate md{ Logger::Error };
+	MyNamedLogger md{ Logger::Error };
 	Logger logger{ &md };
 
 	logger.error("{} {} {}", 1, 2, 3);
