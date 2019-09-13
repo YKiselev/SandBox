@@ -3,6 +3,7 @@
 #include "SbPal/Pal.h"
 #include "SbCommon/StringConversion.h"
 #include <mutex>
+#include <cstdio>
 
 namespace
 {
@@ -11,19 +12,57 @@ namespace
 		return 0 == strcmp(app::DefaultGameFolder, name);
 	}
 
-	class ReadableFile : public sb_spi::Readable
+	//
+	// BaseFile
+	//
+	class BaseFile : public sb_spi::SharedObject
 	{
 	public:
-		ReadableFile(FILE* file) : _file{ file, std::fclose }
+		BaseFile(std::FILE* file) : _file{ file, std::fclose }
 		{
 		}
-		virtual ~ReadableFile()
+		void release() override final
 		{
+			delete this;
 		}
-
+	protected:
+		FILE* file() const {
+			return _file.get();
+		}
 	private:
-		std::unique_ptr<FILE, int(*)(FILE*)> _file;
+		std::unique_ptr<std::FILE, int(*)(std::FILE*)> _file;
 	};
+
+	//
+	// Readable file
+	//
+	class ReadableFile : virtual public sb_spi::Readable, public BaseFile
+	{
+	public:
+		ReadableFile(std::FILE* file) : BaseFile{ file }
+		{
+		}
+		size_t read(char* buf, size_t capacity) override
+		{
+			return std::fread(buf, sizeof(char), capacity, file());
+		}
+	};
+
+	//
+	// Writable file
+	//
+	class WritableFile : virtual public sb_spi::Writable, public BaseFile
+	{
+	public:
+		WritableFile(std::FILE* file) : BaseFile{ file }
+		{
+		}
+		size_t write(const char* buf, size_t length) override
+		{
+			return std::fwrite(buf, sizeof(char), length, file());
+		}
+	};
+
 }
 
 namespace app

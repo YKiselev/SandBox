@@ -1,6 +1,7 @@
 
 #include "../../include/SbPal/Pal.h"
 #include <ShlObj.h>
+#include "SbCommon/StringConversion.h"
 
 namespace sb_pal
 {
@@ -16,5 +17,11 @@ namespace sb_pal
 		::CoTaskMemFree(buf);
 
 		return result;
+	}
+
+	std::FILE* open(const char* name, const char* mode)
+	{
+		std::wstring n{ sb_com::widen(name) }, m{ sb_com::widen(mode) };
+		return _wfopen(n.c_str(), m.c_str());
 	}
 }

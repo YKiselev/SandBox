@@ -10,7 +10,7 @@ public:
 	void release() override
 	{
 	}
-	int read(char* buf, size_t capacity) override
+	size_t read(char* buf, size_t capacity) override
 	{
 		return 0;
 	}
@@ -19,7 +19,7 @@ public:
 class MyWritable : public Writable
 {
 public:
-	int write(const char* buf, size_t length) override
+	size_t write(const char* buf, size_t length) override
 	{
 		return 0;
 	}

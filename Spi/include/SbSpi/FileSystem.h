@@ -18,7 +18,7 @@ namespace sb_spi
 		// @param capacity the buffre's capacity.
 		// @return the number of bytes read or -1 if end of stream reached.
 		//
-		virtual int read(char* buf, size_t capacity) = 0;
+		virtual size_t read(char* buf, size_t capacity) = 0;
 	};
 
 	//
@@ -34,7 +34,7 @@ namespace sb_spi
 		// @param length number of bytes to write
 		// @return number of bytes written or -1 if stream is closed.
 		//
-		virtual int write(const char* buf, size_t length) = 0;
+		virtual size_t write(const char* buf, size_t length) = 0;
 	};
 
 	//

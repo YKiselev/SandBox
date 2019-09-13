@@ -5,6 +5,7 @@ include(GoogleTest)
 add_executable(SbCommonTests 
 	src/StringConversionTest.cpp
 	src/FormatTest.cpp
+	src/FixedStringTest.cpp
 )
 
 target_link_libraries(SbCommonTests 
