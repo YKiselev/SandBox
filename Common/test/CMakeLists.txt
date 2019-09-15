@@ -15,10 +15,11 @@ target_link_libraries(SbCommonTests
 )
 
 gtest_discover_tests(SbCommonTests)
-
+#[[
 add_custom_command(
      TARGET SbCommonTests
      COMMENT "Run tests"
      POST_BUILD 
      COMMAND SbCommonTests
 )
+]]
